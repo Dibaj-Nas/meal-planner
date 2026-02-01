@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Outil de planification de repas hebdomadaires avec génération automatique, calcul des coûts et apports nutritionnels">
+    <meta http-equiv="refresh" content="30">
+    <title>Planificateur de Repas Hebdomadaires</title>
+    <link rel="icon" href="img/Logo_D.png">
+    <link rel="stylesheet" href="Style.css">
+</head>
+<body>
+    <!-- en-tête -->
+    <header role="banner">
+        <h1>Planificateur de Repas</h1>
+        <p class="subtitle">Générez des menus équilibrés et économiques</p>
+    </header>
+
+    <!-- navigation principale -->
+    <nav role="navigation" aria-label="Navigation principale" class="main-nav">
+        <button class="nav-btn" onclick="showTab('generate')" aria-label="Aller à l'onglet('')">
+            <span aria-hidden="true"></span>Générer un menu</button>
+        <button class="nav-btn" onclick="showTab('ingredients')" aria-label="Aller à l'onglet('')">
+            <span aria-hidden="true"></span>Mes ingrédients</button>
+        <button class="nav-btn" onclick="showTab('recipes')" aria-label="Aller à l'onglet('')">
+            <span aria-hidden="true"></span>Mes recettes</button>
+        <button class="nav-btn" onclick="showTab('menu')" aria-label="Aller à l'onglet('')">
+            <span aria-hidden="true"></span>Mon menu</button>
+    </nav>
+
+    <!-- section: génération de menu aléatoire -->
+     <section id="tab-generate" class="tab-content" role="tabpanel" aria-labelledby="generate">
+        <div class="card">
+            <h2>Générer un menu hebdomadaire</h2>
+
+            <!-- définir le budget pour générer la menu -->
+            <div class="form-group">
+                <label for="budget">Budget hebdomadaire (€)</label>
+                <input type="number" id="budget" name="budget" min="0" step="0.5" value="50" aria-describedby="budget-help">
+                <small id="budget-help">Définissez voutre budget pour la semaine</small>
+            </div>
+
+            <!-- définir le nombre des personnes -->
+            <div class="form-group">
+                <label for="personne">Nombre de personnes</label>
+                <input type="number" id="persons" name="persons" min="1" max="12" value="2" aria-describedby="persons-help">
+                <small id="persons-help">Pour combien de personnes planifiez-vous</small>
+            </div>
+
+            <!-- partie select avec des options pour choisir la préférences alimentaire -->
+            <div class="form-group">
+                <label for="dietary">Préférence alimentaire</label>
+                <select id="dietary" name="dietary" aria-describedby="dietary-help">
+                    <option value="all">Tout</option>
+                    <option value="vegetarian">Végétarien</option>
+                    <option value="vegan">Vegan</option>
+                    <option value="no-pork">Sans Porc</option>
+                </select>
+                <small id="dietary-help">Choisissez vos préférences alimentaires</small>
+            </div>
+
+            <!-- le boutton pour générer la menu -->
+            <button class="btn btn-primary" onclick="generateMenu()" aria-label="Générer un nouveau menu aléatoire">Générer un menu aléatoire</button>
+
+            <!-- génération de la menu aléatoire -->
+             <div id="generation-result" role="region" aria-live="polite" aria-atomic="true"></div>
+        </div>
+
+     </section>
+
+     <!-- section: gestion des ingrédients -->
+    <section id="tab-ingredients" class="tab-content" role="tabpanel" aria-labelledby="ingredients">
+        <div class="card">
+            <h2>Gérer mes ingrédients disponibles</h2>
+            
+            <!-- la formulaire de addIngredient pour ajouter des ingrédients -->
+             <form onsubmit="addIngredient(event)" class="ingredient-form">
+                
+             </form>
+        </div>
+    </section>
+    
+</body>
+</html>
