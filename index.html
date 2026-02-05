@@ -4,10 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Outil de planification de repas hebdomadaires avec génération automatique, calcul des coûts et apports nutritionnels">
-    <meta http-equiv="refresh" content="30">
     <title>Planificateur de Repas Hebdomadaires</title>
     <link rel="icon" href="img/Logo_D.png">
-    <link rel="stylesheet" href="Style.css">
+    <link rel="stylesheet" href="style/Style.css">
 </head>
 <body>
     <!-- en-tête -->
@@ -18,15 +17,20 @@
 
     <!-- navigation principale -->
     <nav role="navigation" aria-label="Navigation principale" class="main-nav">
-        <button class="nav-btn" onclick="showTab('generate')" aria-label="Aller à l'onglet('')">
+        <button class="nav-btn" onclick="showTab('generate')" aria-label="Aller à l'onglet génération de menu">
             <span aria-hidden="true"></span>Générer un menu</button>
-        <button class="nav-btn" onclick="showTab('ingredients')" aria-label="Aller à l'onglet('')">
+
+        <button class="nav-btn" onclick="showTab('ingredients')" aria-label="Aller à l'onglet gestion des Ingrédients">
             <span aria-hidden="true"></span>Mes ingrédients</button>
-        <button class="nav-btn" onclick="showTab('recipes')" aria-label="Aller à l'onglet('')">
+
+        <button class="nav-btn" onclick="showTab('recipes')" aria-label="Aller à l'onglet gestion des recettes">
             <span aria-hidden="true"></span>Mes recettes</button>
-        <button class="nav-btn" onclick="showTab('menu')" aria-label="Aller à l'onglet('')">
+            
+        <button class="nav-btn" onclick="showTab('menu')" aria-label="Aller à l'onglet visualisation du menu">
             <span aria-hidden="true"></span>Mon menu</button>
     </nav>
+
+    <main id="main-content" class="container">
 
     <!-- section: génération de menu aléatoire -->
      <section id="tab-generate" class="tab-content" role="tabpanel" aria-labelledby="generate">
@@ -75,10 +79,183 @@
             
             <!-- la formulaire de addIngredient pour ajouter des ingrédients -->
              <form onsubmit="addIngredient(event)" class="ingredient-form">
-                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ingredient-name">Nom de l'ingrédient</label>
+                        <input type="text" id="ingredient-name" name="ingredient-name" required
+                            aria-required="true" placeholder="Ex: Tomates">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="ingredient-price">Prix unitaire (€)</label>
+                    <input type="number" id="ingredient-price" name="ingredient-price"
+                        min="0" step="0.01" required aria-required="true" placeholder="2.50">
+                </div>
+
+                <div class="form-group">
+                    <label for="ingredient-unit">Unité</label>
+                    <select id="ingredient-unit" name="ingredient-unit">
+                        <option value="kg">Kg</option>
+                        <option value="g">Grammes</option>
+                        <option value="L">Litres</option>
+                        <option value="piece">Pièce</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ingredient-calories">Calories (pour 100g)</label>
+                        <input type="number" id="ingredient-calories" name="ingredient-calories" 
+                               min="0" placeholder="45">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ingredient-protein">Protéines (g)</label>
+                        <input type="number" id="ingredient-protein" name="ingredient-protein" 
+                               min="0" step="0.1" placeholder="3.5">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ingredient-category">Catégorie</label>
+                        <select id="ingredient-category" name="ingredient-category">
+                            <option value="vegetables">Légumes</option>
+                            <option value="fruits">Fruits</option>
+                            <option value="meat">Viande</option>
+                            <option value="fish">Poisson</option>
+                            <option value="dairy">Produits laitiers</option>
+                            <option value="grains">Céréales</option>
+                            <option value="other">Autre</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- le boutton pour ajouter l'ingrédient random -->
+                <button type="submit" class="btn btn-primary">
+                    Ajouter l'ingrédient
+                </button>
              </form>
+
+             <!-- l'ingrédient ajouté  -->
+              <div id="ingredients-list" class="items-list" role="list"></div>
         </div>
     </section>
     
+    <!-- section: gestion des recettes  -->
+     <section id="tab-recipes" class="tab-content" role="tabpanel" aria-labelledby="recipes">
+        <h2>Gérer mes recettes</h2>
+
+        <!-- formulaire pour gérer et ajouter les recettes personalisé -->
+        <form onsubmit="addRecipe(event)" class="recipe-form">
+            <div class="form-group">
+                <label for="recipe-name">Nom de la recette</label>
+                <input type="text" id="recipe-name" required aria-required="true" placeholder="Ex: Poulet rôti aux légumes">
+            </div>
+
+            <div class="form-row">
+                <label for="recipe-type">Type de repas</label>
+                <select id="recipe-type" name="recipe-type">
+                    <option value="breakfast">Petit-déjeuner</option>
+                    <option value="lunch">Déjeuner</option>
+                    <option value="dinner">Dîner</option>
+                </select>
+
+                <label for="recipe-time">Temps de préparation (min)</label>
+                <input type="number" id="recipe-time" name="recipe-time" min="5" placeholder="30 min">
+
+                <label for="recipe-dietary">Type alimentaire</label>
+                <select id="recipe-dietary" name="recipe-dietary">
+                    <option value="all">Tout</option>
+                    <option value="vegetarian">Végétarien</option>
+                    <option value="vegan">Végan</option>
+                    <option value="no-pork">Sans porc</option>
+                </select>
+
+                <div class="form-group">
+                    <label for="recipe-ingredients">ingrédients (séparés par des virgules)</label>
+                    <textarea id="recipe-ingredients" name="recipe-ingredients" rows="3"
+                        placeholder="Poulet, Pommes de terre, Carottes, Oignons"
+                        aria-describedby="recipe-ingredients-help"></textarea>
+                        <small id="recipe-ingredients-help">Listez les ingrédients séparés par des virgules</small>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Ajouter la recette</button>
+            </div>
+        </form>
+
+        <div id="recipes-list" class="items-list" role="list"></div>
+     </section>
+
+     <!-- section: menu hebdomadaire -->
+      <section id="tab-menu" class="tab-content" role="tabpanel" aria-labelledby="menu">
+        <h2>Mon menu de la semaine</h2>
+
+        <!-- je vais créer les boutton dans un seule div  -->
+        <div class="btn-action">
+
+            <!-- le boutton pour exporter au format pdf -->
+            <button class="btn btn-secondary" onclick="exportToPDF()"
+                aria-label="Exporter le menu au format PDF">
+                Exporter PDF
+            </button>
+
+            <!-- le boutton pour exporter au format calendrier -->
+            <button class="btn btn-secondary" onclick="exportToICS()"
+                aria-label="Exporter le menu au format calendrier">
+                Exporter ICS
+            </button>
+
+            <!-- le boutton pour effacer le menu -->
+            <button class="btn btn-secondary" onclick="clearMenu()"
+                aria-label="Effacer tout le menu">
+                Effacer
+            </button>
+        </div>
+
+        <!-- le menu de la semaine -->
+        <div id="weekly-menu" class="weekly-grid"></div>
+      </section>    
+    </main>
+
+    <!-- le footer avec résumés -->
+     <footer>
+        <!-- Résumé nutritionnel et financier -->
+        <div class="summary-section">
+            <div class="summary-card">
+                <h3>Résumé financier</h3>
+                <div class="summary-content">
+                    <div class="summary-item">
+                        <span>Coût total:</span>
+                        <strong id="total-cost">0.00 €</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Coût par repas:</span>
+                        <strong id="cost-per-meal">0.00 €</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Coût par personne:</span>
+                        <strong id="cost-per-person">0.00 €</strong>
+                    </div>
+                </div>
+            </div          
+            <div class="summary-card">
+                <h3>Apports nutritionnels (hebdomadaire)</h3>
+                <div class="summary-content">
+                    <div class="summary-item">
+                        <span>Calories totales:</span>
+                        <strong id="total-calories">0 kcal</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Protéines:</span>
+                        <strong id="total-protein">0 g</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Calories/jour:</span>
+                        <strong id="calories-per-day">0 kcal</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+     </footer>
 </body>
 </html>
