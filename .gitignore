@@ -1,1 +1,32 @@
-Documentation/
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# virtual environment
+.venv/
+venv/
+env/
+
+# testing / coverage
+.coverage
+htmlcov/
+dist/
+build/
+
+# IDEs
+.vscode/
+.idea/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Logs
+*.log
+
+# Other
+.env
