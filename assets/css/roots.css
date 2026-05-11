@@ -1,0 +1,65 @@
+:root {
+    /* Couleurs de base */
+    --bg-color: #F0EADC;
+    --primary-color: #F3E7D9;
+    --secondary-color: #544349;
+
+    /* Boutons et actions */
+    --btn-color: #CE2A2A;
+    --title-color: #576238;
+    --text-color: #2A191F;
+    --text-activ: #F3E7D9;
+    --text-medium: #4a4a4a;
+    --text-light: #666;
+    --text-lighter: #999;
+    --breakfast: #EAD3B8;
+    --lunch: #EFC696;
+    --diner: #E7B377;
+
+    /* Couleurs sémantiques (utilisées par .btn-*, .item-card, .day-card…) */
+    --primary: #576238;
+    --primary-light: #6e7a47;
+    --secondary: #CE2A2A;
+    --secondary-dark: #a82222;
+    --accent: #E8963C;
+    --danger: #CE2A2A;
+    --success: #4a9060;
+    --warning: #e07c28;
+
+    /* Fonds */
+    --bg-light: #F7F3EA;
+    --bg-hover: #EDE7D3;
+    --bg-card: #F3E7D9;
+
+    /* Bordures */
+    --border: rgba(84, 67, 73, 0.3);
+    --border-dark: #544349;
+
+    /* Texte */
+    --text-dark: #2A191F;
+
+    /* Ombres */
+    --shadow-sm: 0 2px 8px rgba(45, 80, 22, 0.06);
+    --shadow-md: 0 4px 16px rgba(45, 80, 22, 0.1);
+    --shadow-lg: 0 12px 30px rgba(45, 80, 22, 0.15);
+
+    /* Espacements */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 2rem;
+
+    /* Typographie */
+    --font-family: 'Gloock';
+    --font-base: 'glory';
+    --font-size-base: 16px;
+
+    /* Bordures — rayons */
+    --border-radius: 30px;
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+
+    /* Transition */
+    --transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}

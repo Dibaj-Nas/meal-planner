@@ -1,0 +1,735 @@
+/* 
+   auth.css — Styles partagés : login.html & register.html
+   Planificateur de Repas
+*/
+
+
+/* 1. VARIABLES CSS */
+
+:root {
+    /* Palette principale */
+    --bg-color:        #F0EADC;
+    --primary-color:   #F3E7D9;
+    --secondary-color: #544349;
+    --btn-color:       #CE2A2A;
+    --title-color:     #576238;
+    --success-color:   #576238;
+
+    /* Textes */
+    --text-color:    #2A191F;
+    --text-activ:    #F3E7D9;
+    --text-light:    #7a6a70;
+    --text-lighter:  #aaa;
+
+    /* Mise en forme */
+    --border-radius: 12px;
+    --transition:    all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --shadow-md:     0 4px 24px rgba(84, 67, 73, 0.13);
+    --shadow-lg:     0 12px 40px rgba(84, 67, 73, 0.18);
+}
+
+/* 2. RESET & BASE */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Commissioner', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Texture de fond en dégradé radial */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+        radial-gradient(ellipse 600px 400px at 10% 80%, rgba(87, 98, 56, 0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 500px 500px at 90% 20%, rgba(206, 42, 42, 0.05) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Accessibilité — focus clavier */
+*:focus-visible {
+    outline: 3px solid var(--secondary-color);
+    outline-offset: 2px;
+}
+
+/* 3. PANNEAU HÉRO (colonne décorative) */
+.hero-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 4rem 3.5rem;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+/* Cercles décoratifs via pseudo-éléments */
+.hero-panel::before {
+    content: '';
+    position: absolute;
+    width: 420px;
+    height: 420px;
+    border-radius: 50%;
+    border: 2px solid rgba(243, 231, 217, 0.12);
+    bottom: -120px;
+    right: -120px;
+}
+
+.hero-panel::after {
+    content: '';
+    position: absolute;
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    border: 2px solid rgba(243, 231, 217, 0.08);
+    top: -60px;
+    left: -60px;
+}
+
+/* Tache de couleur décorative */
+.hero-deco,
+.hero-accent {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(206, 42, 42, 0.12);
+    pointer-events: none;
+}
+
+/* login.html : tache à droite */
+.hero-deco {
+    width: 180px;
+    height: 180px;
+    top: 40%;
+    right: -50px;
+}
+
+/* register.html : tache à gauche */
+.hero-accent {
+    width: 140px;
+    height: 140px;
+    bottom: 30%;
+    left: -40px;
+    background: rgba(206, 42, 42, 0.14);
+}
+
+/* Badge/tag coloré */
+.hero-tag {
+    background: rgba(243, 231, 217, 0.12);
+    color: var(--text-activ);
+    border-radius: 20px;
+    padding: 0.35rem 1rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 1.8rem;
+    position: relative;
+    z-index: 2;
+}
+
+/* Titre héro */
+.hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 3vw, 2.8rem);
+    color: var(--text-activ);
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 2;
+}
+
+.hero-title em {
+    font-style: italic;
+    color: rgba(243, 231, 217, 0.65);
+}
+
+/* Description héro */
+.hero-desc {
+    color: rgba(243, 231, 217, 0.6);
+    font-size: 0.97rem;
+    font-weight: 300;
+    line-height: 1.7;
+    max-width: 340px;
+    margin-bottom: 2.5rem;
+    position: relative;
+    z-index: 2;
+}
+
+/* Liste features (login) */
+.hero-features {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    position: relative;
+    z-index: 2;
+}
+
+.hero-features li {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    color: rgba(243, 231, 217, 0.8);
+    font-size: 0.92rem;
+    font-weight: 300;
+}
+
+.feature-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--btn-color);
+    flex-shrink: 0;
+}
+
+/* Liste étapes (register) */
+.steps {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    position: relative;
+    z-index: 2;
+}
+
+.step {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(206, 42, 42, 0.9);
+    color: white;
+    font-size: 0.78rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.step-text {
+    color: rgba(243, 231, 217, 0.75);
+    font-size: 0.9rem;
+    font-weight: 300;
+    line-height: 1.5;
+}
+
+.step-text strong {
+    color: var(--text-activ);
+    font-weight: 600;
+    display: block;
+    font-size: 0.93rem;
+}
+
+/* 4. PANNEAU FORMULAIRE (colonne principale) */
+.auth-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 3rem 4rem;
+    position: relative;
+    z-index: 1;
+    overflow-y: auto;
+}
+
+/* ── Logo / Marque ── */
+
+.brand-logo img {
+    width: 100px;
+    height: 100px;
+    background: white;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    margin-bottom: 0.7rem;
+}
+
+.brand-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    color: var(--title-color);
+    font-weight: 700;
+    letter-spacing: -0.3px;
+}
+
+/* ── Titres du formulaire ── */
+.auth-heading {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.9rem, 3.2vw, 2.6rem);
+    color: var(--title-color);
+    line-height: 1.15;
+    margin-bottom: 0.6rem;
+    font-weight: 700;
+}
+
+.auth-subheading {
+    color: var(--text-light);
+    font-size: 0.97rem;
+    font-weight: 300;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+/* 5. FORMULAIRE — Groupes & Champs */
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+/* Grille deux colonnes (register) */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.42rem;
+}
+
+.form-group label {
+    font-size: 0.87rem;
+    font-weight: 600;
+    color: var(--text-color);
+    letter-spacing: 0.2px;
+}
+
+/* Wrapper avec icône à gauche */
+.input-wrapper {
+    position: relative;
+}
+
+.input-wrapper .icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.95rem;
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding: 0.85rem 1rem 0.85rem 2.7rem;
+    border: 2px solid rgba(84, 67, 73, 0.22);
+    border-radius: var(--border-radius);
+    font-family: 'Commissioner', sans-serif;
+    font-size: 0.97rem;
+    background: var(--primary-color);
+    color: var(--text-color);
+    transition: var(--transition);
+}
+
+.input-wrapper input::placeholder {
+    color: var(--text-lighter);
+}
+
+.input-wrapper input:hover {
+    border-color: rgba(84, 67, 73, 0.45);
+}
+
+.input-wrapper input:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 4px rgba(84, 67, 73, 0.07);
+    outline: none;
+}
+
+/* États de validation */
+.input-wrapper input.valid {
+    border-color: var(--success-color);
+}
+
+.input-wrapper input.invalid {
+    border-color: var(--btn-color);
+}
+
+/* Hint sous un champ */
+.field-hint {
+    font-size: 0.8rem;
+    color: var(--text-lighter);
+    margin-top: 0.15rem;
+    min-height: 1.1em;
+}
+
+/* ── Bouton toggle visibilité mot de passe ── */
+.toggle-pw {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    opacity: 0.4;
+    transition: opacity 0.2s;
+    padding: 0;
+    line-height: 1;
+}
+
+.toggle-pw:hover {
+    opacity: 0.8;
+}
+
+/* 6. INDICATEUR DE FORCE DU MOT DE PASSE (register) */
+.pw-strength {
+    margin-top: 0.45rem;
+}
+
+.strength-bar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 0.3rem;
+}
+
+.strength-segment {
+    height: 3px;
+    flex: 1;
+    border-radius: 2px;
+    background: rgba(84, 67, 73, 0.15);
+    transition: background 0.3s ease;
+}
+
+/* Couleurs selon le niveau */
+.strength-segment.filled-weak   { background: var(--btn-color); }
+.strength-segment.filled-medium { background: #e89c30; }
+.strength-segment.filled-strong { background: var(--success-color); }
+
+.strength-label {
+    font-size: 0.78rem;
+    color: var(--text-lighter);
+    transition: color 0.3s;
+}
+
+/* 7. OPTIONS (login : "Se souvenir" + "Mot de passe oublié") */
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.88rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    color: var(--text-light);
+    font-weight: 400;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--secondary-color);
+    cursor: pointer;
+}
+
+.forgot-link {
+    color: var(--btn-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: opacity 0.2s;
+}
+
+.forgot-link:hover {
+    opacity: 0.7;
+}
+
+/* ── CGU (register) ── */
+.cgu-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    cursor: pointer;
+    font-size: 0.88rem;
+    color: var(--text-light);
+    line-height: 1.5;
+    font-weight: 400;
+}
+
+.cgu-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--secondary-color);
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.cgu-label a {
+    color: var(--btn-color);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.cgu-label a:hover {
+    opacity: 0.7;
+}
+
+/* 8. BOUTON PRINCIPAL */
+.btn-main {
+    width: 100%;
+    padding: 1rem;
+    background: var(--secondary-color);
+    color: var(--text-activ);
+    border: none;
+    border-radius: var(--border-radius);
+    font-family: 'Commissioner', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    letter-spacing: 0.3px;
+}
+
+/* Surcouche lumineuse au hover */
+.btn-main::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0);
+    transition: background 0.3s;
+}
+
+.btn-main:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-main:hover::after {
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.btn-main:active {
+    transform: translateY(0);
+}
+
+.btn-main:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Contenu interne centré (texte + flèche) */
+.btn-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* Variante verte pour register */
+.btn-main.btn-green {
+    background: var(--title-color);
+}
+
+.btn-main.btn-green:hover {
+    filter: brightness(1.06);
+    box-shadow: 0 6px 20px rgba(87, 98, 56, 0.3);
+}
+
+/* 9. MESSAGES D'ALERTE */
+.error-msg,
+.success-msg {
+    display: none;
+    border-radius: 8px;
+    padding: 0.78rem 1rem;
+    font-size: 0.88rem;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.error-msg {
+    background: #f8d7da;
+    border-left: 3px solid var(--btn-color);
+    color: #721c24;
+}
+
+.success-msg {
+    background: #d8f3dc;
+    border-left: 3px solid var(--success-color);
+    color: #1b4332;
+}
+
+/* Classe JS pour rendre visible */
+.error-msg.visible,
+.success-msg.visible {
+    display: flex;
+    animation: msgFadeIn 0.3s ease;
+}
+
+/* Animation secousse pour erreur */
+.error-msg.visible {
+    animation: shake 0.4s ease, msgFadeIn 0.3s ease;
+}
+
+@keyframes msgFadeIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25%       { transform: translateX(-6px); }
+    75%       { transform: translateX(6px); }
+}
+
+/* 10. LIEN DE BASCULE (login ↔ register) */
+.auth-switch {
+    text-align: center;
+    font-size: 0.92rem;
+    color: var(--text-light);
+}
+
+.auth-switch a {
+    color: var(--btn-color);
+    font-weight: 600;
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.auth-switch a:hover {
+    opacity: 0.7;
+}
+
+/* 11. ANIMATIONS D'ENTRÉE */
+
+/* Panneau formulaire — slide depuis le bas */
+.auth-panel > * {
+    opacity: 0;
+    transform: translateY(18px);
+    animation: fadeUp 0.5s ease forwards;
+}
+
+.brand           { animation-delay: 0.06s; }
+.auth-heading    { animation-delay: 0.13s; }
+.auth-subheading { animation-delay: 0.19s; }
+.auth-form       { animation-delay: 0.25s; }
+
+@keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Panneau héro login — slide depuis la droite */
+.hero-panel.slide-from-right > * {
+    opacity: 0;
+    transform: translateX(18px);
+    animation: fadeLeft 0.55s ease forwards;
+}
+
+.hero-panel.slide-from-right .hero-tag      { animation-delay: 0.15s; }
+.hero-panel.slide-from-right .hero-title    { animation-delay: 0.22s; }
+.hero-panel.slide-from-right .hero-desc     { animation-delay: 0.30s; }
+.hero-panel.slide-from-right .hero-features { animation-delay: 0.38s; }
+
+@keyframes fadeLeft {
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* Panneau héro register — slide depuis la gauche */
+.hero-panel.slide-from-left > * {
+    opacity: 0;
+    transform: translateX(-16px);
+    animation: fadeRight 0.5s ease forwards;
+}
+
+.hero-panel.slide-from-left .hero-tag   { animation-delay: 0.10s; }
+.hero-panel.slide-from-left .hero-title { animation-delay: 0.18s; }
+.hero-panel.slide-from-left .hero-desc  { animation-delay: 0.26s; }
+.hero-panel.slide-from-left .steps      { animation-delay: 0.34s; }
+
+@keyframes fadeRight {
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* 12. RESPONSIVE */
+@media (max-width: 900px) {
+    body {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+    }
+
+    .hero-panel {
+        padding: 2.5rem 2rem;
+        min-height: 200px;
+        order: -1;
+    }
+
+    /* On masque les contenus longs sur mobile */
+    .hero-desc,
+    .hero-features,
+    .steps {
+        display: none;
+    }
+
+    .hero-title {
+        font-size: 1.8rem;
+        margin-bottom: 0;
+    }
+
+    .auth-panel {
+        padding: 2.5rem 2rem;
+    }
+
+    /* Une seule colonne pour le formulaire register */
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 1.2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .auth-panel {
+        padding: 2rem 1.4rem;
+    }
+
+    .form-options {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.6rem;
+    }
+}
+
+/* 13. IMPRESSION */
+@media print {
+    .hero-panel  { display: none; }
+    body         { grid-template-columns: 1fr; }
+    .auth-panel  { padding: 2rem; }
+}
