@@ -2,8 +2,6 @@
 /**
  * config.php — Constantes de connexion à la base de données.
  *
- * ⚠️  Modifier ces valeurs avant de déployer en production.
- *     Ne jamais versionner ce fichier avec des identifiants réels.
  */
 
 // Base de données

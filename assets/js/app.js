@@ -1,5 +1,4 @@
 // app.js — Planificateur de Repas
-// Écrit par un étudiant qui apprend le JavaScript :)
 // Ce fichier gère toute la logique de l'application :
 //   - Onglets de navigation
 //   - Ingrédients (ajout, suppression, affichage)
@@ -9,8 +8,6 @@
 //   - Export en PDF et en calendrier (ICS)
 
 
-
-// DONNÉES DE BASE — listes et libellés utilisés partout
 
 
 // Les 7 jours de la semaine avec leurs emojis
