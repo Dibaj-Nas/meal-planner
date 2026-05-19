@@ -23,5 +23,11 @@ meal-planner/
 ├── database.sql
 ├── .gitignore             ← à corriger pour JS/PHP
 └── docs/
-    ├── README.md
-    └── CDC.pdf
+│   ├── README.md
+│   └── CDC.pdf
+│
+│__ model/
+│     │__ Utilisateurs
+│  
+│
+    
