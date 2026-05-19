@@ -220,7 +220,7 @@
             <!-- Lien vers la connexion -->
             <p class="auth-switch">
                 Déjà un compte ?
-                <a href="login.html">Se connecter</a>
+                <a href="login.php">Se connecter</a>
             </p>
 
         </form>

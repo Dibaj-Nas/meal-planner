@@ -1003,3 +1003,298 @@ document.addEventListener('DOMContentLoaded', function() {
 
   console.info('%c🍽️ Planificateur de Repas — Prêt !', 'color:#576238; font-size:14px; font-weight:bold;');
 });
+
+/* 
+   MODULE : MENU UTILISATEUR (DROPDOWN)
+   
+
+   Fonctionnement : TODO
+   - Lit les données utilisateur depuis sessionStorage (ou fallback mock)
+   - Injecte le nom / l'initiale / l'email dans le bouton et le dropdown
+   - Gère l'ouverture / fermeture (clic, Escape, clic extérieur)
+   - Expose les actions : goToProfile, goToSettings, goToMyMenus,
+      goToFavorites, logout */
+
+'use strict';
+
+/* ── 1. Données utilisateur ──────────────────────────────────── */
+
+/**
+ * Récupère les infos de l'utilisateur connecté.
+ * Priorité : sessionStorage → localStorage → données mock.
+ *
+ * @returns {{ firstname: string, lastname: string, email: string }}
+ */
+function getCurrentUser() {
+    // Tentative depuis sessionStorage (login via API)
+    const raw =
+        sessionStorage.getItem('currentUser') ||
+        localStorage.getItem('currentUser');
+
+    if (raw) {
+        try { return JSON.parse(raw); } catch (_) { /* continue */ }
+    }
+
+    // Données mock — à retirer quand le back-end est prêt
+    return {
+        firstname: 'Marie',
+        lastname:  'Dupont',
+        email:     'marie.dupont@exemple.fr',
+    };
+}
+
+/**
+ * Retourne la ou les initiales de l'utilisateur (1 ou 2 lettres).
+ *
+ * @param {{ firstname: string, lastname: string }} user
+ * @returns {string}
+ */
+function getUserInitials(user) {
+    const f = (user.firstname || '').trim().charAt(0).toUpperCase();
+    const l = (user.lastname  || '').trim().charAt(0).toUpperCase();
+    return f + l || '?';
+}
+
+/**
+ * Retourne le nom complet affiché dans le bouton.
+ *
+ * @param {{ firstname: string, lastname: string }} user
+ * @returns {string}
+ */
+function getUserDisplayName(user) {
+    return `${user.firstname || ''} ${user.lastname || ''}`.trim() || 'Utilisateur';
+}
+
+/* ── 2. Injection des données dans le DOM ────────────────────── */
+
+/**
+ * Injecte les informations de l'utilisateur dans tous les éléments
+ * du bouton et du dropdown.
+ */
+function renderUserInfo() {
+    const user     = getCurrentUser();
+    const initials = getUserInitials(user);
+    const fullName = getUserDisplayName(user);
+
+    // Bouton principal
+    const avatarEl      = document.getElementById('user-avatar');
+    const nameEl        = document.getElementById('user-display-name');
+
+    // Dropdown
+    const dropAvatarEl  = document.getElementById('dropdown-avatar');
+    const dropNameEl    = document.getElementById('dropdown-name');
+    const dropEmailEl   = document.getElementById('dropdown-email');
+
+    if (avatarEl)     avatarEl.textContent     = initials;
+    if (nameEl)       nameEl.textContent        = fullName;
+    if (dropAvatarEl) dropAvatarEl.textContent  = initials;
+    if (dropNameEl)   dropNameEl.textContent    = fullName;
+    if (dropEmailEl)  dropEmailEl.textContent   = user.email || '';
+}
+
+/* ── 3. Logique ouverture / fermeture ────────────────────────── */
+
+/**
+ * Ouvre ou ferme le dropdown utilisateur.
+ */
+function toggleUserDropdown() {
+    const btn      = document.getElementById('user-menu-btn');
+    const dropdown = document.getElementById('user-dropdown');
+    if (!btn || !dropdown) return;
+
+    const isOpen = btn.getAttribute('aria-expanded') === 'true';
+
+    if (isOpen) {
+        closeUserDropdown();
+    } else {
+        openUserDropdown();
+    }
+}
+
+/**
+ * Ouvre le dropdown et met à jour les attributs ARIA.
+ */
+function openUserDropdown() {
+    const btn      = document.getElementById('user-menu-btn');
+    const dropdown = document.getElementById('user-dropdown');
+    if (!btn || !dropdown) return;
+
+    btn.setAttribute('aria-expanded', 'true');
+    dropdown.removeAttribute('hidden');
+
+    // Focus sur le premier item pour l'accessibilité clavier
+    const firstItem = dropdown.querySelector('.dropdown-item');
+    if (firstItem) firstItem.focus();
+}
+
+/**
+ * Ferme le dropdown et remet le focus sur le bouton.
+ */
+function closeUserDropdown() {
+    const btn      = document.getElementById('user-menu-btn');
+    const dropdown = document.getElementById('user-dropdown');
+    if (!btn || !dropdown) return;
+
+    btn.setAttribute('aria-expanded', 'false');
+    dropdown.setAttribute('hidden', '');
+    btn.focus();
+}
+
+/* ── 4. Gestion des événements ───────────────────────────────── */
+
+/**
+ * Initialise tous les écouteurs d'événements du menu utilisateur.
+ * Appelé au DOMContentLoaded.
+ */
+function initUserMenu() {
+    renderUserInfo();
+
+    const btn     = document.getElementById('user-menu-btn');
+    const wrapper = document.getElementById('user-menu-wrapper');
+
+    if (!btn || !wrapper) return;
+
+    /* Clic sur le bouton → toggle */
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleUserDropdown();
+    });
+
+    /* Clavier — navigation dans le dropdown */
+    wrapper.addEventListener('keydown', (e) => {
+        const dropdown = document.getElementById('user-dropdown');
+        const isOpen   = btn.getAttribute('aria-expanded') === 'true';
+
+        switch (e.key) {
+            case 'Escape':
+                if (isOpen) closeUserDropdown();
+                break;
+
+            case 'ArrowDown': {
+                if (!isOpen) { openUserDropdown(); break; }
+                e.preventDefault();
+                const items  = [...dropdown.querySelectorAll('.dropdown-item')];
+                const idx    = items.indexOf(document.activeElement);
+                const next   = items[idx + 1] || items[0];
+                next.focus();
+                break;
+            }
+
+            case 'ArrowUp': {
+                if (!isOpen) break;
+                e.preventDefault();
+                const items  = [...dropdown.querySelectorAll('.dropdown-item')];
+                const idx    = items.indexOf(document.activeElement);
+                const prev   = items[idx - 1] || items[items.length - 1];
+                prev.focus();
+                break;
+            }
+
+            case 'Tab':
+                // Ferme si on tabule hors du dropdown
+                if (isOpen) {
+                    setTimeout(() => {
+                        if (!wrapper.contains(document.activeElement)) {
+                            closeUserDropdown();
+                        }
+                    }, 0);
+                }
+                break;
+        }
+    });
+
+    /* Clic en dehors → ferme le dropdown */
+    document.addEventListener('click', (e) => {
+        if (!wrapper.contains(e.target)) {
+            closeUserDropdown();
+        }
+    });
+}
+
+/* ── 5. Actions du dropdown ──────────────────────────────────── */
+
+/**
+ * Redirige vers la page de profil utilisateur.
+ * TODO : remplacer par la vraie URL quand la page sera créée.
+ */
+function goToProfile() {
+    closeUserDropdown();
+    // window.location.href = 'profile.php';
+    console.info('[UserMenu] → Profil utilisateur (page à créer)');
+    showUserMenuFeedback('Profil (page en cours de développement)');
+}
+
+/**
+ * Redirige vers les paramètres utilisateur.
+ */
+function goToSettings() {
+    closeUserDropdown();
+    // window.location.href = 'settings.php';
+    console.info('[UserMenu] → Paramètres (page à créer)');
+    showUserMenuFeedback('Paramètres (page en cours de développement)');
+}
+
+/**
+ * Redirige vers les menus sauvegardés.
+ */
+function goToMyMenus() {
+    closeUserDropdown();
+    // Navigue vers l'onglet menu dans l'application
+    if (typeof showTab === 'function') {
+        showTab('menu');
+    }
+}
+
+/**
+ * Redirige vers les favoris.
+ */
+function goToFavorites() {
+    closeUserDropdown();
+    // window.location.href = 'favorites.php';
+    console.info('[UserMenu] → Favoris (page à créer)');
+    showUserMenuFeedback('Favoris (page en cours de développement)');
+}
+
+/**
+ * Déconnecte l'utilisateur et redirige vers la page de connexion.
+ */
+function logout() {
+    closeUserDropdown();
+
+    // Supprime les données de session
+    sessionStorage.removeItem('currentUser');
+    sessionStorage.removeItem('authToken');
+    localStorage.removeItem('currentUser');
+
+    // TODO : appel API pour invalider la session côté serveur
+    // await fetch('api/auth/logout', { method: 'POST' });
+
+    window.location.href = 'login.php';
+}
+
+/**
+ * Affiche un message temporaire de retour (feedback toast léger).
+ * Utilisé pour les pages non encore développées.
+ *
+ * @param {string} message
+ */
+function showUserMenuFeedback(message) {
+    // Réutilise la live region de génération si elle existe
+    const region = document.getElementById('generation-result');
+    if (!region) return;
+
+    region.innerHTML = `
+        <div class="alert alert-info" role="status">
+            ℹ️ ${message}
+        </div>
+    `;
+
+    // Efface après 3 secondes
+    setTimeout(() => { region.innerHTML = ''; }, 3000);
+}
+
+/* ── 6. Initialisation au chargement ────────────────────────── */
+
+document.addEventListener('DOMContentLoaded', () => {
+    initUserMenu();
+});

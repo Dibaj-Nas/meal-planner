@@ -13,10 +13,75 @@
     <header>
         <h1>Planificateur de Repas</h1>
         <p class="subtitle">Générez des menus équilibrés et économiques</p>
+
+        <!-- ══ BOUTON UTILISATEUR ══ -->
+        <div class="user-menu-wrapper" id="user-menu-wrapper">
+            <button
+                class="user-menu-btn"
+                id="user-menu-btn"
+                aria-haspopup="true"
+                aria-expanded="false"
+                aria-controls="user-dropdown"
+                aria-label="Menu utilisateur"
+            >
+                <span class="user-avatar" aria-hidden="true" id="user-avatar">M</span>
+                <span class="user-name" id="user-display-name">Marie Dupont</span>
+                <span class="user-chevron" aria-hidden="true" id="user-chevron">▾</span>
+            </button>
+
+            <!-- Dropdown -->
+            <div
+                class="user-dropdown"
+                id="user-dropdown"
+                role="menu"
+                aria-label="Options utilisateur"
+                hidden
+            >
+                <!-- En-tête du dropdown -->
+                <div class="dropdown-header" aria-hidden="true">
+                    <span class="dropdown-avatar" id="dropdown-avatar">M</span>
+                    <div class="dropdown-user-info">
+                        <span class="dropdown-name" id="dropdown-name">Marie Dupont</span>
+                        <span class="dropdown-email" id="dropdown-email">marie.dupont@exemple.fr</span>
+                    </div>
+                </div>
+
+                <div class="dropdown-divider" role="separator"></div>
+
+                <!-- Actions -->
+                <button class="dropdown-item" role="menuitem" onclick="goToProfile()">
+                    <span class="dropdown-icon" aria-hidden="true">👤</span>
+                    Mon profil
+                </button>
+
+                <button class="dropdown-item" role="menuitem" onclick="goToSettings()">
+                    <span class="dropdown-icon" aria-hidden="true">⚙️</span>
+                    Paramètres
+                </button>
+
+                <button class="dropdown-item" role="menuitem" onclick="goToMyMenus()">
+                    <span class="dropdown-icon" aria-hidden="true">📅</span>
+                    Mes menus sauvegardés
+                </button>
+
+                <button class="dropdown-item" role="menuitem" onclick="goToFavorites()">
+                    <span class="dropdown-icon" aria-hidden="true">⭐</span>
+                    Mes favoris
+                </button>
+
+                <div class="dropdown-divider" role="separator"></div>
+
+                <button class="dropdown-item dropdown-item--danger" role="menuitem" onclick="logout()">
+                    <span class="dropdown-icon" aria-hidden="true">🚪</span>
+                    Se déconnecter
+                </button>
+            </div>
+        </div>
+        <!-- ══ FIN BOUTON UTILISATEUR ══ -->
+         <a href="login.php">se connecter</a>
     </header>
 
     <!-- navigation principale -->
-    <!-- Corrigé : class="active" ajouté sur le premier bouton -->
     <nav aria-label="Navigation principale" class="main-nav">
         <button class="nav-btn active" onclick="showTab('generate')" aria-label="Aller à l'onglet génération de menu">
             <span aria-hidden="true"></span>Générer un menu
@@ -38,7 +103,6 @@
     <main id="main-content" class="container">
 
         <!-- section : génération de menu -->
-        <!-- Corrigé : class="tab-content active" pour que cet onglet soit visible au chargement -->
         <section id="tab-generate" class="tab-content active" role="tabpanel" aria-labelledby="generate">
             <div class="card">
                 <h2>Générer un menu hebdomadaire</h2>
@@ -144,7 +208,6 @@
         </section>
 
         <!-- section : gestion des recettes -->
-        <!-- Corrigé : ajout du wrapper .card manquant + structure du formulaire corrigée -->
         <section id="tab-recipes" class="tab-content" role="tabpanel" aria-labelledby="recipes">
             <div class="card">
                 <h2>Gérer mes recettes</h2>
@@ -156,7 +219,6 @@
                             placeholder="Ex: Poulet rôti aux légumes">
                     </div>
 
-                    <!-- Corrigé : chaque champ dans son propre form-group, hors du form-row -->
                     <div class="form-row">
                         <div class="form-group">
                             <label for="recipe-type">Type de repas</label>
@@ -247,7 +309,6 @@
                     </div>
                 </div>
             </div>
-            <!-- Corrigé : balise </div> fermée correctement (était </div          ) -->
             <div class="summary-card">
                 <h3>Apports nutritionnels (hebdomadaire)</h3>
                 <div class="summary-content">

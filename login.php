@@ -98,7 +98,7 @@
             <!-- Lien vers l'inscription -->
             <p class="auth-switch">
                 Nouveau ici ?
-                <a href="register.html">Créer un compte</a>
+                <a href="register.php">Créer un compte</a>
             </p>
 
         </form>
