@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Outil de planification de repas hebdomadaires avec génération automatique, calcul des coûts et apports nutritionnels">
     <title>Planificateur de Repas Hebdomadaires</title>
-    <link rel="icon" href="/assets/img/logoPlanificateurDeRepas.png">
+    <link rel="icon" href="/assets/img/PR.png">
     <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>

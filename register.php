@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Créer un compte sur le Planificateur de Repas">
     <title>Créer un compte — Planificateur de Repas</title>
-    <link rel="icon" href="/assets/img/logoPlanificateurDeRepas.png">
+    <link rel="icon" href="/assets/img/PR.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Commissioner:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/auth.css">

@@ -1,4 +1,5 @@
 // app.js — Planificateur de Repas
+// Écrit par un étudiant qui apprend le JavaScript :)
 // Ce fichier gère toute la logique de l'application :
 //   - Onglets de navigation
 //   - Ingrédients (ajout, suppression, affichage)
@@ -8,11 +9,11 @@
 //   - Export en PDF et en calendrier (ICS)
 
 
-
+// DONNÉES DE BASE — listes et libellés utilisés partout
 
 // Les 7 jours de la semaine avec leurs emojis
 const JOURS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
-const EMOJI_JOURS = ['🌅', '☀️', '🌤️', '⛅', '🌈', '🎉', '😴'];
+const EMOJI_JOURS = ['🌅', '☀️', '🌤️', '⛅', '🎎', '🎉', '😴'];
 
 // Les types de repas dans la journée
 const TYPES_REPAS = {
@@ -42,7 +43,6 @@ const LABELS_REGIME = {
 
 
 // STOCKAGE — sauvegarder et charger les données
-
 
 // Je stocke tout dans localStorage pour ne pas perdre les données
 // quand on recharge la page. C'est une sorte de "base de données locale".
@@ -125,10 +125,7 @@ function animerApparition(element) {
   });
 }
 
-
-
 // NAVIGATION — changer d'onglet
-
 
 // Onglet actuellement visible
 let ongletActif = 'generate';
@@ -187,7 +184,6 @@ function showTab(nomOnglet) {
 
 // TOASTS — petits messages de notification en bas de page
 
-
 // Crée un conteneur fixe en bas de page pour les notifications
 let conteneurToasts = null;
 
@@ -209,9 +205,55 @@ function obtenirConteneurToasts() {
   return conteneurToasts;
 }
 
-// Affiche une notification (type = 'success', 'error', 'warning', 'info') TODO
+// Affiche une notification (type = 'success', 'error', 'warning', 'info')
+function afficherNotification(message, type, duree) {
+  const dureeMs = duree || 3000;
 
+  // Couleurs selon le type de message
+  const couleurs = {
+    success: { fond: '#d8f3dc', texte: '#1b4332', bord: '#4a9060' },
+    error:   { fond: '#f8d7da', texte: '#721c24', bord: '#CE2A2A' },
+    warning: { fond: '#ffe5b4', texte: '#7f3900', bord: '#e07c28' },
+    info:    { fond: '#d1ecf1', texte: '#0c5460', bord: '#17a2b8' },
+  };
+  const style = couleurs[type] || couleurs.info;
 
+  // Crée l'élément de notification
+  const toast = document.createElement('div');
+  toast.style.cssText = [
+    'background:' + style.fond,
+    'color:' + style.texte,
+    'border-left:4px solid ' + style.bord,
+    'padding:.75rem 1.2rem',
+    'border-radius:8px',
+    'font-size:.9rem',
+    'font-weight:500',
+    'pointer-events:auto',
+    'opacity:0',
+    'transform:translateX(20px)',
+    'transition:opacity .3s ease, transform .3s ease',
+    'max-width:320px',
+    'box-shadow:0 2px 12px rgba(0,0,0,.12)',
+  ].join(';');
+  toast.textContent = message;
+
+  obtenirConteneurToasts().appendChild(toast);
+
+  // Apparition
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      toast.style.opacity   = '1';
+      toast.style.transform = 'translateX(0)';
+    });
+  });
+
+  // Disparition automatique
+  setTimeout(function() {
+    toast.style.opacity   = '0';
+    toast.style.transform = 'translateX(20px)';
+    setTimeout(function() { toast.remove(); }, 350);
+  }, dureeMs);
+}
 
 // Raccourcis pratiques
 function notifSucces(msg, duree)  { afficherNotification(msg, 'success', duree); }
@@ -220,9 +262,7 @@ function notifAvert(msg, duree)   { afficherNotification(msg, 'warning', duree);
 function notifInfo(msg, duree)    { afficherNotification(msg, 'info',    duree); }
 
 
-
 // INGRÉDIENTS — ajouter, supprimer, afficher
-
 
 // Ajoute un ingrédient depuis le formulaire
 function addIngredient(event) {
@@ -397,8 +437,8 @@ function initialiserRechercheIngredients() {
   });
 }
 
-// RECETTES — ajouter, supprimer, afficher
 
+// RECETTES — ajouter, supprimer, afficher
 
 // Filtre actif pour les recettes ('all', 'breakfast', 'lunch', 'dinner')
 let filtreRecettes = 'all';
@@ -606,7 +646,6 @@ function initialiserFiltresRecettes() {
   liste.before(barreFiltre);
 }
 
-
 // GÉNÉRATION DU MENU — la fonctionnalité principale !
 
 function generateMenu() {
@@ -765,9 +804,7 @@ function afficherResultatGeneration(menu, budget) {
   animerApparition(zone.firstElementChild);
 }
 
-
 // AFFICHAGE DU MENU — la grille des 7 jours
-
 
 function afficherMenu() {
   const grille = document.getElementById('weekly-menu');
@@ -863,22 +900,371 @@ function clearMenu() {
   notifInfo('Menu effacé.');
 }
 
+// RÉSUMÉ FINANCIER ET NUTRITIONNEL — en bas de page
 
-// RÉSUMÉ FINANCIER ET NUTRITIONNEL — en bas de page -> TODO
+function mettreAJourResume() {
+  const menu = donneesApp.menuActuel;
 
+  // Si pas de menu, on remet les compteurs à zéro
+  if (!menu || !menu.jours) {
+    reinitialiserResume();
+    return;
+  }
 
-// EXPORT PDF — télécharger le menu en PDF -> TODO
+  // On récupère toutes les recettes du menu (tous les jours confondus)
+  const toutesLesRecettes = [];
+  menu.jours.forEach(function(jour) {
+    const repas = jour.repas || {};
+    if (repas.breakfast) toutesLesRecettes.push(repas.breakfast);
+    if (repas.lunch)     toutesLesRecettes.push(repas.lunch);
+    if (repas.dinner)    toutesLesRecettes.push(repas.dinner);
+  });
 
+  // On calcule les totaux
+  let coutTotal     = 0;
+  let caloriesTotal = 0;
+  let proteinesTotal= 0;
 
-// EXPORT ICS — exporter le menu dans un calendrier -> TODO
+  toutesLesRecettes.forEach(function(recette) {
+    coutTotal      += Number(recette.estimated_cost || 0);
+    caloriesTotal  += Number(recette.calories       || 0);
+    proteinesTotal += Number(recette.protein        || 0);
+  });
 
+  const nbRepas    = toutesLesRecettes.length || 1;
+  const nbPersonnes = Number(menu.personnes || 2);
 
+  // Mise à jour des éléments dans la page (avec animation de compteur)
+  animerCompteur(document.getElementById('total-cost'),      coutTotal,              formaterEuro);
+  animerCompteur(document.getElementById('cost-per-meal'),   coutTotal / nbRepas,    formaterEuro);
+  animerCompteur(document.getElementById('cost-per-person'), coutTotal / nbPersonnes,formaterEuro);
+  animerCompteur(document.getElementById('total-calories'),  caloriesTotal,          function(v) { return formaterNutrition(v); });
+  animerCompteur(document.getElementById('total-protein'),   proteinesTotal,         function(v) { return formaterNutrition(v, 'g'); });
+  animerCompteur(document.getElementById('calories-per-day'),caloriesTotal / 7,      function(v) { return formaterNutrition(v); });
+
+  // Badge budget (économie ou dépassement)
+  afficherBadgeBudget(coutTotal, Number(menu.budget || 0));
+}
+
+// Remet tous les compteurs à zéro
+function reinitialiserResume() {
+  const el = function(id) { return document.getElementById(id); };
+  if (el('total-cost'))      el('total-cost').textContent      = '0,00 €';
+  if (el('cost-per-meal'))   el('cost-per-meal').textContent   = '0,00 €';
+  if (el('cost-per-person')) el('cost-per-person').textContent = '0,00 €';
+  if (el('total-calories'))  el('total-calories').textContent  = '0 kcal';
+  if (el('total-protein'))   el('total-protein').textContent   = '0 g';
+  if (el('calories-per-day'))el('calories-per-day').textContent= '0 kcal';
+}
+
+// Anime un compteur numérique (de 0 vers la valeur cible)
+function animerCompteur(element, valeurCible, formateur, dureeMs) {
+  if (!element) return;
+  const duree   = dureeMs || 800;
+  const debut   = performance.now();
+
+  function actualiser(maintenant) {
+    const progression = Math.min((maintenant - debut) / duree, 1);
+    // Courbe "ease-out" pour un effet plus naturel
+    const facteur = 1 - Math.pow(1 - progression, 3);
+    element.textContent = formateur(valeurCible * facteur);
+    if (progression < 1) requestAnimationFrame(actualiser);
+  }
+  requestAnimationFrame(actualiser);
+}
+
+// Affiche ou met à jour le badge budget (vert = économies, rouge = dépassement)
+function afficherBadgeBudget(cout, budget) {
+  let badge = document.getElementById('budget-badge');
+
+  if (!badge) {
+    badge = document.createElement('div');
+    badge.id = 'budget-badge';
+    badge.style.cssText = 'margin-top:.8rem; padding:.5rem 1rem; border-radius:8px;'
+      + 'font-size:.9rem; font-weight:600; text-align:center; transition:all .4s ease;';
+    const premiereSummaryCard = document.querySelector('.summary-card');
+    if (premiereSummaryCard) premiereSummaryCard.appendChild(badge);
+  }
+
+  if (budget <= 0) {
+    badge.style.display = 'none';
+    return;
+  }
+
+  badge.style.display = 'block';
+  const difference = budget - cout;
+
+  if (difference >= 0) {
+    badge.textContent      = '✅ Économie : ' + formaterEuro(difference);
+    badge.style.background = '#d8f3dc';
+    badge.style.color      = '#1b4332';
+  } else {
+    badge.textContent      = '⚠️ Dépassement : ' + formaterEuro(Math.abs(difference));
+    badge.style.background = '#f8d7da';
+    badge.style.color      = '#721c24';
+  }
+}
+
+// EXPORT PDF — télécharger le menu en PDF
+
+async function exportToPDF() {
+  const menu = donneesApp.menuActuel;
+
+  if (!menu || !menu.jours || menu.jours.length === 0) {
+    notifAvert("Générez d'abord un menu avant d'exporter.");
+    return;
+  }
+
+  // On essaie de charger la librairie jsPDF
+  const jsPDF = await chargerJsPDF();
+
+  if (!jsPDF) {
+    // Pas de jsPDF disponible → on utilise l'impression du navigateur
+    notifInfo('Ouverture de la fenêtre impression du navigateur…');
+    window.print();
+    return;
+  }
+
+  notifInfo('Génération du PDF en cours…');
+
+  const doc     = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const marge   = 15;
+  const largCol = (210 - marge * 2) / 7;
+  let   y       = marge;
+
+  // --- En-tête ---
+  doc.setFillColor(87, 98, 56);
+  doc.rect(0, 0, 210, 28, 'F');
+  doc.setTextColor(243, 231, 217);
+  doc.setFontSize(18);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Planificateur de Repas — Menu de la Semaine', 105, 12, { align: 'center' });
+
+  const dateAujourdhui = new Date().toLocaleDateString('fr-FR', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Généré le ' + dateAujourdhui, 105, 22, { align: 'center' });
+
+  y = 36;
+
+  // --- Résumé rapide ---
+  let coutTotal     = 0;
+  let caloriesTotal = 0;
+  menu.jours.forEach(function(jour) {
+    const repas = jour.repas || {};
+    [repas.breakfast, repas.lunch, repas.dinner].forEach(function(r) {
+      if (r) {
+        coutTotal     += Number(r.estimated_cost || 0);
+        caloriesTotal += Number(r.calories       || 0);
+      }
+    });
+  });
+  const difference = Number(menu.budget || 0) - coutTotal;
+
+  doc.setFillColor(240, 234, 220);
+  doc.rect(marge, y, 210 - marge * 2, 14, 'F');
+  doc.setTextColor(42, 25, 31);
+  doc.setFontSize(9);
+  doc.text('Budget : ' + formaterEuro(menu.budget),           marge + 4,   y + 5);
+  doc.text('Coût estimé : ' + formaterEuro(coutTotal),        marge + 50,  y + 5);
+  doc.text((difference >= 0 ? 'Économie' : 'Dépassement') + ' : ' + formaterEuro(Math.abs(difference)), marge + 110, y + 5);
+  doc.text('Personnes : ' + (menu.personnes || 2),            marge + 4,   y + 11);
+  doc.text('Calories totales : ' + formaterNutrition(caloriesTotal),       marge + 50,  y + 11);
+  doc.text('Préférence : ' + (LABELS_REGIME[menu.regime] || menu.regime),  marge + 110, y + 11);
+
+  y += 20;
+
+  // --- En-têtes des colonnes (jours de la semaine) ---
+  doc.setFillColor(84, 67, 73);
+  doc.rect(marge, y, 210 - marge * 2, 7, 'F');
+  doc.setTextColor(243, 231, 217);
+  doc.setFontSize(7.5);
+  doc.setFont('helvetica', 'bold');
+
+  menu.jours.forEach(function(jour, i) {
+    const x    = marge + i * largCol;
+    const nom  = jour.nom || JOURS[i] || '';
+    doc.text(nom.substring(0, 3).toUpperCase(), x + largCol / 2, y + 4.5, { align: 'center' });
+  });
+
+  y += 9;
+
+  // --- Grille des repas ---
+  const couleursRepas = {
+    breakfast: [234, 211, 184],
+    lunch:     [239, 198, 150],
+    dinner:    [231, 179, 119],
+  };
+
+  ['breakfast', 'lunch', 'dinner'].forEach(function(type) {
+    const infoType  = TYPES_REPAS[type];
+    const hautLigne = 22;
+    const couleur   = couleursRepas[type] || [240, 234, 220];
+
+    menu.jours.forEach(function(jour, i) {
+      const x      = marge + i * largCol;
+      const recette = (jour.repas || {})[type];
+
+      doc.setFillColor(couleur[0], couleur[1], couleur[2]);
+      doc.rect(x, y, largCol, hautLigne, 'F');
+      doc.setDrawColor(200, 190, 190);
+      doc.rect(x, y, largCol, hautLigne, 'S');
+
+      doc.setTextColor(42, 25, 31);
+      doc.setFontSize(6);
+      doc.setFont('helvetica', 'bold');
+      doc.text(infoType.label.toUpperCase(), x + 1.5, y + 4);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6.5);
+
+      if (recette) {
+        const lignes = doc.splitTextToSize(recette.name, largCol - 3);
+        doc.text(lignes.slice(0, 2), x + 1.5, y + 9);
+        doc.setFontSize(5.5);
+        doc.setTextColor(100, 80, 85);
+        doc.text(formaterEuro(recette.estimated_cost) + ' | ' + (recette.prep_time || '?') + 'min', x + 1.5, y + 18);
+      } else {
+        doc.setTextColor(160, 140, 145);
+        doc.text('—', x + largCol / 2, y + 12, { align: 'center' });
+      }
+    });
+
+    y += hautLigne;
+  });
+
+  // --- Pied de page ---
+  doc.setFillColor(87, 98, 56);
+  doc.rect(0, 280, 210, 17, 'F');
+  doc.setTextColor(243, 231, 217);
+  doc.setFontSize(8);
+  doc.text('© 2026 Planificateur de Repas', 105, 289, { align: 'center' });
+
+  // Sauvegarde du fichier
+  const dateStr = new Date().toISOString().slice(0, 10);
+  doc.save('menu-semaine-' + dateStr + '.pdf');
+
+  notifSucces('PDF téléchargé avec succès !');
+}
+
+// Charge la librairie jsPDF depuis un CDN
+function chargerJsPDF() {
+  // Si déjà chargée, on la retourne directement
+  if (window.jspdf && window.jspdf.jsPDF) {
+    return Promise.resolve(window.jspdf.jsPDF);
+  }
+
+  // Sinon on crée une balise <script> pour la charger
+  return new Promise(function(resolve) {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    script.onload  = function() { resolve(window.jspdf?.jsPDF || null); };
+    script.onerror = function() { resolve(null); }; // échec → on retourne null
+    document.head.appendChild(script);
+  });
+}
+
+// EXPORT ICS — exporter le menu dans un calendrier
+
+function exportToICS() {
+  const menu = donneesApp.menuActuel;
+
+  if (!menu || !menu.jours || menu.jours.length === 0) {
+    notifAvert("Générez d'abord un menu avant d'exporter.");
+    return;
+  }
+
+  // Structure du fichier ICS (format standard pour les calendriers)
+  const lignes = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Planificateur de Repas//FR',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'X-WR-CALNAME:Menu de la Semaine',
+    'X-WR-TIMEZONE:Europe/Paris',
+  ];
+
+  // On calcule le lundi de la semaine courante
+  const lundi = new Date();
+  lundi.setDate(lundi.getDate() - ((lundi.getDay() + 6) % 7));
+
+  // Convertit une date en format ICS (ex: 20260113)
+  function formaterDateICS(date) {
+    return date.toISOString().replace(/[-:]/g, '').slice(0, 8);
+  }
+
+  // Heures de début et fin pour chaque type de repas
+  const heuresDebut = { breakfast: '08', lunch: '12', dinner: '19' };
+  const heuresFin   = { breakfast: '09', lunch: '13', dinner: '20' };
+
+  // On crée un événement ICS pour chaque repas
+  menu.jours.forEach(function(jour, indexJour) {
+    const dateJour = new Date(lundi);
+    dateJour.setDate(lundi.getDate() + indexJour);
+    const dateStr = formaterDateICS(dateJour);
+
+    const repas = jour.repas || {};
+
+    ['breakfast', 'lunch', 'dinner'].forEach(function(type) {
+      const recette = repas[type];
+      if (!recette) return; // pas de recette pour ce créneau
+
+      const infoType = TYPES_REPAS[type];
+      const uid_val  = Date.now() + '-' + indexJour + '-' + type + '@mealplanner';
+      const debut    = dateStr + 'T' + heuresDebut[type] + '0000';
+      const fin      = dateStr + 'T' + heuresFin[type]   + '0000';
+      const titre    = infoType.emoji + ' ' + recette.name;
+
+      const description = [
+        'Type : ' + infoType.label,
+        'Temps de préparation : ' + (recette.prep_time || '?') + ' min',
+        'Coût estimé : ' + formaterEuro(recette.estimated_cost),
+        'Calories : ' + formaterNutrition(recette.calories),
+      ].join('\\n');
+
+      lignes.push(
+        'BEGIN:VEVENT',
+        'UID:' + uid_val,
+        'DTSTART:' + debut,
+        'DTEND:' + fin,
+        'SUMMARY:' + titre,
+        'DESCRIPTION:' + description,
+        'CATEGORIES:Repas,' + infoType.label,
+        'STATUS:CONFIRMED',
+        'END:VEVENT'
+      );
+    });
+  });
+
+  lignes.push('END:VCALENDAR');
+
+  // Crée un fichier à télécharger
+  const contenu = lignes.join('\r\n');
+  const blob    = new Blob([contenu], { type: 'text/calendar;charset=utf-8' });
+  const url     = URL.createObjectURL(blob);
+
+  const lien    = document.createElement('a');
+  lien.href     = url;
+  lien.download = 'menu-semaine-' + new Date().toISOString().slice(0, 10) + '.ics';
+  document.body.appendChild(lien);
+  lien.click();
+
+  // On nettoie après le téléchargement
+  setTimeout(function() {
+    URL.revokeObjectURL(url);
+    lien.remove();
+  }, 1000);
+
+  notifSucces('Fichier calendrier (.ics) téléchargé !');
+}
 
 // STYLES CSS DYNAMIQUES — injectés au chargement
 
-
 // Quelques styles supplémentaires qu'on ajoute directement en JS
-// (pour éviter de modifier le fichier CSS)
+// (pour éviter de modifier le fichier CSS) À REVOIR PLUS TARD
 (function ajouterStyles() {
   const style = document.createElement('style');
   style.textContent = `
@@ -941,8 +1327,6 @@ function clearMenu() {
   document.head.appendChild(style);
 })();
 
-
-
 // DÉMARRAGE — tout commence ici quand la page est chargée
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -1004,16 +1388,15 @@ document.addEventListener('DOMContentLoaded', function() {
   console.info('%c🍽️ Planificateur de Repas — Prêt !', 'color:#576238; font-size:14px; font-weight:bold;');
 });
 
-/* 
-   MODULE : MENU UTILISATEUR (DROPDOWN)
-   
+/* MODULE : MENU UTILISATEUR (DROPDOWN)
 
-   Fonctionnement : TODO
+   Fonctionnement :
    - Lit les données utilisateur depuis sessionStorage (ou fallback mock)
    - Injecte le nom / l'initiale / l'email dans le bouton et le dropdown
    - Gère l'ouverture / fermeture (clic, Escape, clic extérieur)
    - Expose les actions : goToProfile, goToSettings, goToMyMenus,
-      goToFavorites, logout */
+       goToFavorites, logout
+    */
 
 'use strict';
 
