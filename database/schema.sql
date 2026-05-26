@@ -1,5 +1,5 @@
 -- Schéma base de données — Planificateur de Repas Hebdomadaires
--- ════════════════════════════════════════════════════════════════
+
 
 CREATE DATABASE IF NOT EXISTS meal_planner
   CHARACTER SET utf8mb4
@@ -198,7 +198,7 @@ BEGIN
   -- Boucle : 7 jours × 3 créneaux
   WHILE v_day < 7 DO
 
-    -- ── Petit-déjeuner ──────────────────────────────────────────
+    -- ── Petit-déjeuner ───
     SET v_recipe_id = NULL;
     SELECT id, estimated_cost INTO v_recipe_id, v_cost
     FROM   recipes
@@ -283,9 +283,9 @@ END$$
 DELIMITER ;
 
 
--- ════════════════════════════════════════════════════════════════
+
 -- TRIGGERS
--- ════════════════════════════════════════════════════════════════
+
 
 DELIMITER $$
 
@@ -336,7 +336,7 @@ INSERT IGNORE INTO users (firstname, lastname, email, password) VALUES
 
 SET @uid = (SELECT id FROM users WHERE email = 'demo@mealplanner.fr');
 
--- Ingrédients de base
+-- Ingrédients de base (les ingrédients dans le schema sont temporaires et non définitifs génèrer par IA)
 INSERT IGNORE INTO ingredients (user_id, name, price, unit, calories, protein, category) VALUES
 (@uid, 'Poulet (filet)',    8.50, 'kg',     165.0, 31.0, 'meat'),
 (@uid, 'Saumon',           14.00, 'kg',     208.0, 20.0, 'fish'),
