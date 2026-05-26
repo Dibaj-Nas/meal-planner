@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1:3306
--- Généré le : lun. 11 mai 2026 à 14:00
+-- Généré le : mar. 26 mai 2026 à 13:31
 -- Version du serveur : 9.1.0
 -- Version de PHP : 8.3.14
 
@@ -59,15 +59,15 @@ DROP TABLE IF EXISTS `ingredients`;
 CREATE TABLE IF NOT EXISTS `ingredients` (
   `id_ingredient` int NOT NULL AUTO_INCREMENT,
   `nom` varchar(100) NOT NULL,
-  `prix_unitaire` decimal(10,2) DEFAULT NULL,
-  `unite_mesure` varchar(50) DEFAULT NULL,
-  `calories_par_unite` int DEFAULT NULL,
-  `proteines_par_unite` decimal(10,2) DEFAULT NULL,
-  `glucides_par_unite` decimal(10,2) DEFAULT NULL,
-  `lipides_par_unite` decimal(10,2) DEFAULT NULL,
-  `id_categorie` int DEFAULT NULL,
+  `prix_unitaire` decimal(10,2) NOT NULL,
+  `unite_mesure` varchar(20) NOT NULL,
+  `calories_par_unite` decimal(10,2) NOT NULL,
+  `proteines_par_unite` decimal(10,2) NOT NULL,
+  `glucides_par_unite` decimal(10,2) NOT NULL,
+  `lipides_par_unite` decimal(10,2) NOT NULL,
+  `id_categorie` int NOT NULL,
   PRIMARY KEY (`id_ingredient`),
-  KEY `id_categorie` (`id_categorie`)
+  KEY `fk_ingredients_categories` (`id_categorie`)
 ) ENGINE=MyISAM AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
@@ -75,26 +75,26 @@ CREATE TABLE IF NOT EXISTS `ingredients` (
 --
 
 INSERT INTO `ingredients` (`id_ingredient`, `nom`, `prix_unitaire`, `unite_mesure`, `calories_par_unite`, `proteines_par_unite`, `glucides_par_unite`, `lipides_par_unite`, `id_categorie`) VALUES
-(1, 'Tomate', 2.50, 'kg', 180, 8.80, 38.80, 2.00, 1),
-(2, 'Poulet', 8.90, 'kg', 2390, 310.00, 0.00, 140.00, 2),
-(3, 'Saumon', 15.50, 'kg', 2080, 200.00, 0.00, 132.00, 3),
-(4, 'Pâtes', 1.20, 'kg', 3710, 130.00, 750.00, 15.00, 4),
-(5, 'Riz', 1.50, 'kg', 3650, 66.00, 800.00, 6.60, 4),
-(6, 'Œufs', 3.20, 'douzaine', 1560, 126.00, 7.20, 105.00, 5),
-(7, 'Lait', 1.10, 'L', 640, 33.00, 47.00, 36.00, 5),
-(8, 'Fromage emmental', 12.00, 'kg', 4030, 288.00, 15.00, 313.00, 5),
-(9, 'Carotte', 1.80, 'kg', 410, 9.30, 96.00, 2.40, 1),
-(10, 'Oignon', 1.50, 'kg', 400, 11.00, 92.00, 1.00, 1),
-(11, 'Pomme de terre', 1.20, 'kg', 770, 20.00, 170.00, 0.90, 1),
-(12, 'Huile olive', 8.50, 'L', 8840, 0.00, 0.00, 1000.00, 7),
-(13, 'Sel', 0.80, 'kg', 0, 0.00, 0.00, 0.00, 7),
-(14, 'Poivre', 15.00, 'kg', 2510, 104.00, 640.00, 33.00, 7),
-(15, 'Baguette', 1.00, 'unité', 2650, 88.00, 550.00, 32.00, 8),
-(16, 'Courgette', 2.20, 'kg', 170, 12.00, 33.00, 3.20, 1),
-(17, 'Poivron', 3.50, 'kg', 200, 10.00, 46.00, 3.00, 1),
-(18, 'Ail', 8.00, 'kg', 1490, 63.00, 331.00, 5.00, 7),
-(19, 'Bœuf haché', 12.00, 'kg', 2500, 260.00, 0.00, 200.00, 2),
-(20, 'Jambon', 15.00, 'kg', 1450, 210.00, 10.00, 65.00, 2);
+(1, 'Tomate', 2.50, 'kg', 180.00, 8.80, 38.80, 2.00, 1),
+(2, 'Poulet', 8.90, 'kg', 2390.00, 310.00, 0.00, 140.00, 2),
+(3, 'Saumon', 15.50, 'kg', 2080.00, 200.00, 0.00, 132.00, 3),
+(4, 'Pâtes', 1.20, 'kg', 3710.00, 130.00, 750.00, 15.00, 4),
+(5, 'Riz', 1.50, 'kg', 3650.00, 66.00, 800.00, 6.60, 4),
+(6, 'Œufs', 3.20, 'douzaine', 1560.00, 126.00, 7.20, 105.00, 5),
+(7, 'Lait', 1.10, 'L', 640.00, 33.00, 47.00, 36.00, 5),
+(8, 'Fromage emmental', 12.00, 'kg', 4030.00, 288.00, 15.00, 313.00, 5),
+(9, 'Carotte', 1.80, 'kg', 410.00, 9.30, 96.00, 2.40, 1),
+(10, 'Oignon', 1.50, 'kg', 400.00, 11.00, 92.00, 1.00, 1),
+(11, 'Pomme de terre', 1.20, 'kg', 770.00, 20.00, 170.00, 0.90, 1),
+(12, 'Huile olive', 8.50, 'L', 8840.00, 0.00, 0.00, 1000.00, 7),
+(13, 'Sel', 0.80, 'kg', 0.00, 0.00, 0.00, 0.00, 7),
+(14, 'Poivre', 15.00, 'kg', 2510.00, 104.00, 640.00, 33.00, 7),
+(15, 'Baguette', 1.00, 'unité', 2650.00, 88.00, 550.00, 32.00, 8),
+(16, 'Courgette', 2.20, 'kg', 170.00, 12.00, 33.00, 3.20, 1),
+(17, 'Poivron', 3.50, 'kg', 200.00, 10.00, 46.00, 3.00, 1),
+(18, 'Ail', 8.00, 'kg', 1490.00, 63.00, 331.00, 5.00, 7),
+(19, 'Bœuf haché', 12.00, 'kg', 2500.00, 260.00, 0.00, 200.00, 2),
+(20, 'Jambon', 15.00, 'kg', 1450.00, 210.00, 10.00, 65.00, 2);
 
 -- --------------------------------------------------------
 
@@ -106,10 +106,10 @@ DROP TABLE IF EXISTS `menu_hebdomadaire`;
 CREATE TABLE IF NOT EXISTS `menu_hebdomadaire` (
   `id_menu` int NOT NULL AUTO_INCREMENT,
   `id_utilisateur` int NOT NULL,
-  `semaine` int NOT NULL,
-  `budget` decimal(10,2) DEFAULT NULL,
+  `semaine` date NOT NULL,
+  `budget` decimal(10,2) NOT NULL,
   PRIMARY KEY (`id_menu`),
-  KEY `id_utilisateur` (`id_utilisateur`)
+  KEY `idx_menu_utilisateur` (`id_utilisateur`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -124,12 +124,12 @@ CREATE TABLE IF NOT EXISTS `recette` (
   `nom` varchar(150) NOT NULL,
   `description` text,
   `instructions` text,
-  `temps_preparation` int DEFAULT NULL,
-  `temps_cuisson` int DEFAULT NULL,
-  `nombre_personnes` int DEFAULT NULL,
-  `difficulte` varchar(50) DEFAULT NULL,
-  `type_repas` varchar(50) DEFAULT NULL,
-  `saison` varchar(50) DEFAULT NULL,
+  `temps_preparation` int NOT NULL,
+  `temps_cuisson` int NOT NULL,
+  `nombre_personnes` int NOT NULL,
+  `difficulte` enum('facile','moyen','difficile') NOT NULL,
+  `type_repas` varchar(20) NOT NULL,
+  `saison` varchar(20) NOT NULL,
   PRIMARY KEY (`id_recette`)
 ) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -159,7 +159,7 @@ CREATE TABLE IF NOT EXISTS `recette_ingredient` (
   `quantite` decimal(10,2) DEFAULT NULL,
   `unite` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id_recette`,`id_ingredient`),
-  KEY `id_ingredient` (`id_ingredient`)
+  KEY `fk_recetteingredient_ingredient` (`id_ingredient`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
@@ -215,10 +215,11 @@ DROP TABLE IF EXISTS `repas`;
 CREATE TABLE IF NOT EXISTS `repas` (
   `id_repas` int NOT NULL AUTO_INCREMENT,
   `id_menu` int NOT NULL,
-  `jour` varchar(50) NOT NULL,
-  `type_repas` varchar(50) NOT NULL,
+  `jour` date NOT NULL,
+  `type_repas` varchar(20) NOT NULL,
   PRIMARY KEY (`id_repas`),
-  KEY `id_menu` (`id_menu`)
+  KEY `idx_repas_menu` (`id_menu`),
+  KEY `idx_repas_type` (`type_repas`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -232,7 +233,7 @@ CREATE TABLE IF NOT EXISTS `repas_recette` (
   `id_repas` int NOT NULL,
   `id_recette` int NOT NULL,
   PRIMARY KEY (`id_repas`,`id_recette`),
-  KEY `id_recette` (`id_recette`)
+  KEY `fk_repasrecette_recette` (`id_recette`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -246,28 +247,37 @@ CREATE TABLE IF NOT EXISTS `stock` (
   `id_stock` int NOT NULL AUTO_INCREMENT,
   `id_utilisateur` int NOT NULL,
   `id_ingredient` int NOT NULL,
-  `quantite` decimal(10,2) DEFAULT '0.00',
+  `quantite` decimal(10,2) NOT NULL,
   PRIMARY KEY (`id_stock`),
-  KEY `id_utilisateur` (`id_utilisateur`),
-  KEY `id_ingredient` (`id_ingredient`)
+  KEY `idx_stock_utilisateur` (`id_utilisateur`),
+  KEY `idx_stock_ingredient` (`id_ingredient`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
 --
--- Structure de la table `utilisateur`
+-- Structure de la table `utilisateurs`
 --
 
-DROP TABLE IF EXISTS `utilisateur`;
-CREATE TABLE IF NOT EXISTS `utilisateur` (
+DROP TABLE IF EXISTS `utilisateurs`;
+CREATE TABLE IF NOT EXISTS `utilisateurs` (
   `id_utilisateur` int NOT NULL AUTO_INCREMENT,
-  `nom` varchar(100) NOT NULL,
-  `prenom` varchar(100) NOT NULL,
-  `email` varchar(150) NOT NULL,
-  `mot_de_passe` varchar(255) NOT NULL,
+  `nom` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `prenom` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(191) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `mot_de_passe` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `role` enum('user','admin') COLLATE utf8mb4_unicode_ci DEFAULT 'user',
+  `date_creation` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_utilisateur`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Déchargement des données de la table `utilisateurs`
+--
+
+INSERT INTO `utilisateurs` (`id_utilisateur`, `nom`, `prenom`, `email`, `mot_de_passe`, `role`, `date_creation`) VALUES
+(1, 'Jouin', 'johan', 'johan.jouin18@gmail.com', '$2y$10$VlB1WowMV2bwiUoo3njqCuWma0AJttQ92aK9gOsWSJu8/OLMJkGSO', 'user', '2026-05-26 11:50:11');
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
