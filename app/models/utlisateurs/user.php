@@ -1,5 +1,7 @@
 <?php
+namespace app\models;
 
+use app\core\Database
 // Importation des classes nécessaires de la bibliothèque PHPMailer
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
