@@ -1,7 +1,7 @@
 <?php
 namespace App\Middleware;
 
-use App\Core\Security;
+use app\core\Security
 
 /**
  * AuthMiddleware — Protection des routes authentifiées
