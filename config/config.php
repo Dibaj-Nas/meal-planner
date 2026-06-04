@@ -1,15 +1,17 @@
 <?php
 /**
- * config/config.php = la configuration global du projet
- * 
- * IMPORTANT: Ce fichier NE DOIT PAS être versionné avec de vraies credentials
+ * config/config.php — Configuration globale
+ * Planificateur de Repas
+ *
+ * Important : Ce fichier NE doit PAS être versionné avec de vraies credentials.
+ *     il sera dans le .gitignore en production.
+ *
+ * Chemins PHPMailer réels :
+ *   app/models/utlisateurs/vendor/phpmailer/phpmailer/src/
  */
 
-
-// 1. ENVIRONNEMENT
-
-
-define('APP_ENV',   'development');  // 'development' | 'production'
+// 1. Environnement
+define('ENV', 'development'); // en development ou en production
 define('APP_DEBUG', APP_ENV === 'development');
 
 if (APP_DEBUG) {
@@ -20,89 +22,67 @@ if (APP_DEBUG) {
     error_reporting(0);
 }
 
+// 2. les chemins 
 
-// 2. LES CHEMINS 
-
-
-/**
- * ROOT_PATH = dossier racine du projet (parent de app/)
- * Exemple : /Users/dibajnasrullah/Tp_dev/Projet fin formation/Projet
+/** 
+ * ROOT_PATH = dossier racine de projet (parent de app/)
  */
-define('ROOT_PATH', dirname(__DIR__));
+define('ROOT_PATH', __DIR__ . '/..');
 
-/**
- * APP_PATH = dossier app/
- */
+// APP_PATH = dossier de l'application (app/)
 define('APP_PATH', ROOT_PATH . '/app');
 
-/**
- * Chemin exact vers le vendor PHPMailer dans VOTRE arborescence :
- * app/models/utlisateurs/vendor/
- */
-define('PHPMAILER_VENDOR', APP_PATH . '/models/utlisateurs/vendor');
+// chemin vers le vendor PHPMailer 
+define('PHPMAILER_PATH', APP_PATH . '/models/utilisateurs/vendor');
 
-
-//  3. BASE DE DONNÉES
-
-
-define('DB_HOST',    'localhost');
-define('DB_NAME',    'meal_planner');
-define('DB_USER',    'root');        // ← à remplacer
-define('DB_PASS',    '');            // ← à remplacer
+// 3. la base de données 
+define('DB_HOST', 'localhost');
+define('DB_NAME', 'planificateur_repas');
+define('DB_USER', 'root');
+define('DB_PASS', '');
 define('DB_CHARSET', 'utf8mb4');
 
+// 4. application 
+define('APP_URL', 'http//localhost:3000');
+define('SESSION_LIFETIME', 1800); // 30 min
+define('CSRF_SECRET', 'changez-cette-cle-secret-64-chars-minimum');
 
-//  4. APPLICATION
-
-
-define('APP_URL',          'http://localhost:8000');
-define('SESSION_LIFETIME', 1800);   // 30 minutes
-define('CSRF_SECRET',      'changez-cette-cle-secrete-64-chars-minimum');
-
-
-// 5. PHPMAILER (SMTP)
-
-
-define('MAIL_HOST',       'smtp.gmail.com');
-define('MAIL_PORT',       587);
-define('MAIL_USERNAME',   'votre@gmail.com');    // ← à remplacer
-define('MAIL_PASSWORD',   'votre-app-password'); // ← mot de passe d'application Gmail
+// 5. PHPMailer (SMTP)
+define('MAIL_HOST', 'smtp.gmail.com');
+define('MAIL_PORT', 587);
+define('MAIL_USERNAME', 'planificateur.repas@gmail.com');
+define('MAIL_PASSWORD', ''); // TODO le mot de passe de Gmail à défiinir
 define('MAIL_ENCRYPTION', 'tls');
-define('MAIL_FROM_EMAIL', 'noreply@mealplanner.fr');
-define('MAIL_FROM_NAME',  'Planificateur de Repas');
+define('MAIL_FROM_EMAIL', 'noreplay@planificateur-repas.com');
+define('MAIL_FROM_NAME', 'Planificateur de Repas');
 
-
-// 6. SESSION SÉCURISÉE
-
-
+// 6. session sécurisée
 if (session_status() === PHP_SESSION_NONE) {
-    session_set_cookie_params([
+    session_start([
         'lifetime' => SESSION_LIFETIME,
-        'path'     => '/',
-        'secure'   => (APP_ENV === 'production'),
+        'path' => '/',
+        'secure' => (APP_ENV === 'development'),
         'httponly' => true,
-        'samesite' => 'Strict',
+        'samesite' => 'strict',
     ]);
     session_start();
 }
 
+// 7. autoloaders
 
-// 7. AUTOLOADERS
-
-
-/* — Autoloader Composer (PHPMailer + dépendances) — */
+// autoloader composer (PHPMailer + dépendances)
 $composerAutoload = PHPMAILER_VENDOR . '/autoload.php';
 if (file_exists($composerAutoload)) {
     require_once $composerAutoload;
 } else {
-    /* Fallback : chargement manuel si Composer n'est pas disponible */
+    // chargement manuel si composer n'est pas disponible
     $src = PHPMAILER_VENDOR . '/phpmailer/phpmailer/src';
     require_once $src . '/Exception.php';
     require_once $src . '/PHPMailer.php';
     require_once $src . '/SMTP.php';
 }
 
-/* — Autoloader PSR-4 maison pour les classes app/ — */
+// autoloader PSR-4 pour les classes de app/
 spl_autoload_register(function (string $fullyQualifiedClass): void {
     /*
      * Convention de nommage :
@@ -112,22 +92,22 @@ spl_autoload_register(function (string $fullyQualifiedClass): void {
      *   App\Services\MealGeneratorService → app/services/MealGeneratorService.php
      *   App\Middleware\AuthMiddleware    → app/middleware/AuthMiddleware.php
      */
-    $prefix = 'App\\';
-    if (strncmp($prefix, $fullyQualifiedClass, strlen($prefix)) !== 0) {
-        return; // pas notre namespace → on ignore
-    }
+    $prefix = 'app\\';
+    if (strncmp($prefix, $fullyQualifiedClass, strlen($prefix)) !== 0)
+        {
+            return; // pas de namespace = on ignore
+        }
 
-    $relativePath = substr($fullyQualifiedClass, strlen($prefix)); // ex: "Controllers\AuthController"
-    $parts        = explode('\\', $relativePath);
-    $className    = array_pop($parts);
-    $subDir       = strtolower(implode('/', $parts));               // ex: "controllers"
+        $relativePath = substr($fullyQualifiedClass, strlen($prefix)); // par ex: controllers\AuthController
+        $parts = explode('\\', $relativePath);
+        $className = array_pop($parts);
+        $subDir = strtolower(implode('/', $parts));
 
-    $file = APP_PATH . '/' . ($subDir ? $subDir . '/' : '') . $className . '.php';
+        $file = APP_PATH . '/' . ($subDir ? $subDir . '/' : '') . $className . '.php';
 
     if (file_exists($file)) {
         require_once $file;
     }
+
 });
-
-
 ?>
