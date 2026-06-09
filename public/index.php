@@ -17,9 +17,21 @@ define('VIEW_PATH',       APP_PATH  . '/views');
 
 // autoloader PSR-0 (controllers + models + services)
 spl_autoload_register(function (string $class): void {
-    $dirs = [CONTROLLER_PATH, MODEL_PATH, SERVICE_PATH, APP_PATH . '/core'];
+    // Convertit app\core\Security → app/core/Security.php
+    $relativePath = str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php';
+    $file = BASE_PATH . DIRECTORY_SEPARATOR . $relativePath;
+
+    if (file_exists($file)) {
+        require_once $file;
+        return;
+    }
+
+    // Fallback : cherche le nom de classe seul dans les répertoires connus
+    $shortName = basename(str_replace('\\', '/', $class)) . '.php';
+    $dirs = [CONTROLLER_PATH, MODEL_PATH, SERVICE_PATH, APP_PATH . '/core', APP_PATH . '/middleware'];
+
     foreach ($dirs as $dir) {
-        $file = $dir . '/' . $class . '.php';
+        $file = $dir . DIRECTORY_SEPARATOR . $shortName;
         if (file_exists($file)) {
             require_once $file;
             return;
@@ -59,14 +71,14 @@ $id       = isset($segments[2]) && is_numeric($segments[2])
               ? (int)$segments[2]
               : null;
 
-// ── Page principale (SPA) ─────────────────────────────────────
+// ── Page principale (SPA) 
 if ($base === '' || $base === 'index.html') {
     header('Content-Type: text/html; charset=UTF-8');
     readfile(BASE_PATH . '/public/index.html');
     exit;
 }
 
-// ── API REST ──────────────────────────────────────────────────
+// ── API REST 
 if ($base !== 'api') {
     http_response_code(404);
     echo json_encode(['success' => false, 'error' => 'Route introuvable']);
@@ -75,7 +87,7 @@ if ($base !== 'api') {
 
 switch ($resource) {
 
-    // ── Authentification ──────────────────────────────────────
+    // ── Authentification 
     case 'auth':
     case 'login':
     case 'register':
@@ -83,54 +95,54 @@ switch ($resource) {
         $controller->handle($method, $resource, $id);
         break;
 
-    // ── Ingrédients ───────────────────────────────────────────
+    // ── Ingrédients 
     case 'ingredients':
     case 'ingredient':
         $controller = new IngredientController();
         $controller->handle($method, $id);
         break;
 
-    // ── Recettes ──────────────────────────────────────────────
+    // ── Recettes 
     case 'recipes':
     case 'recipe':
         $controller = new RecipeController();
         $controller->handle($method, $id);
         break;
 
-    // ── Menus hebdomadaires ───────────────────────────────────
+    // ── Menus hebdomadaires 
     case 'menus':
     case 'menu':
         $controller = new MenuController();
         $controller->handle($method, $id);
         break;
 
-    // ── Génération automatique de menu ────────────────────────
+    // ── Génération automatique de menu 
     case 'generate':
         $controller = new MealController();
         $controller->generate($method);
         break;
 
-    // ── Export PDF ────────────────────────────────────────────
+    // ── Export PDF 
     case 'export-pdf':
     case 'export_pdf':
         $controller = new ExportController();
         $controller->exportPdf($method);
         break;
 
-    // ── Export ICS (calendrier) ───────────────────────────────
+    // ── Export ICS (calendrier) 
     case 'export-ics':
     case 'export_ics':
         $controller = new ExportController();
         $controller->exportIcs($method);
         break;
 
-    // ── Nutritionnel ──────────────────────────────────────────
+    // ── Nutritionnel 
     case 'nutrition':
         $controller = new NutritionController();
         $controller->handle($method, $id);
         break;
 
-    // ── Route inconnue ────────────────────────────────────────
+    // ── Route inconnue 
     default:
         http_response_code(404);
         echo json_encode([

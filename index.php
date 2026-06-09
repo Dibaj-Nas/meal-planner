@@ -1,3 +1,10 @@
+<?php
+require_once __DIR__ . '/config/config.php';
+use app\core\Security;
+use app\middleware\AuthMiddleware;
+$csrfToken = Security::csrfToken();
+$currentUser = authMiddleware::currentUser();
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -330,6 +337,18 @@
         <p>&copy; 2026 Application de Gestion de Menu réalisé par Dibaj NASRULLAH & JJ Tous droits réservés.</p>
     </footer>
 
+    <script src="assets/js/api.js"></script>
+    <?php if ($currentUser): ?>
+    <script>
+        // synchronisation session php -> sessionStorage JS
+        sessionStorage.setItem('currentUser', JSON.stringify({
+        id:        <?= (int)$currentUser['id'] ?>,
+        firstname: <?= json_encode($currentUser['firstname']) ?>,
+        lastname:  <?= json_encode($currentUser['lastname']) ?>,
+        email:     <?= json_encode($currentUser['email']) ?>,
+      }));
+    </script>    
+    <?php endif; ?>
     <script src="assets/js/app.js"></script>
 </body>
 </html>

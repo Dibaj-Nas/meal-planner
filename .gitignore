@@ -1,2 +1,4 @@
-#config
-#Security.php
+.env
+database/
+config/
+Security.php

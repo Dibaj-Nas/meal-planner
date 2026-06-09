@@ -1,5 +1,5 @@
 <?php
-namespace app\Controllers;
+namespace app\controllers;
 
 use app\core\Security;
 // use App\Middleware\AuthMiddleware; = TO DO 

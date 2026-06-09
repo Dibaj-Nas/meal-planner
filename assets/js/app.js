@@ -10,7 +10,7 @@
 
 'use strict';
 
-// ═══════════════════════════════════════════════════════════════
+
 // DONNÉES DE BASE — listes et libellés utilisés partout
 // ═══════════════════════════════════════════════════════════════
 
@@ -45,8 +45,8 @@ const LABELS_REGIME = {
 };
 
 
-// ═══════════════════════════════════════════════════════════════
-// STOCKAGE — sauvegarder et charger les données
+
+// stockage — sauvegarder et charger les données
 // ═══════════════════════════════════════════════════════════════
 
 // Données en mémoire (chargées au démarrage)
@@ -79,8 +79,8 @@ function charger() {
 }
 
 
-// ═══════════════════════════════════════════════════════════════
-// PETITS UTILITAIRES
+
+// petit utilitaire
 // ═══════════════════════════════════════════════════════════════
 
 // Formate un nombre en euros (ex: 12.5 → "12,50 €")
@@ -128,9 +128,9 @@ function animerApparition(element) {
 }
 
 
-// ═══════════════════════════════════════════════════════════════
-// NAVIGATION — changer d'onglet
-// ═══════════════════════════════════════════════════════════════
+
+// navigation — changer d'onglet
+
 
 let ongletActif = 'generate';
 
@@ -178,9 +178,9 @@ function showTab(nomOnglet) {
 }
 
 
-// ═══════════════════════════════════════════════════════════════
+
 // TOASTS — notifications en bas de page
-// ═══════════════════════════════════════════════════════════════
+
 
 let conteneurToasts = null;
 
@@ -254,10 +254,10 @@ function notifAvert(msg, duree)  { afficherNotification(msg, 'warning', duree); 
 function notifInfo(msg, duree)   { afficherNotification(msg, 'info',    duree); }
 
 
-// ═══════════════════════════════════════════════════════════════
-// INGRÉDIENTS — ajouter, supprimer, afficher
-// ═══════════════════════════════════════════════════════════════
 
+// ingrédients — ajouter, supprimer, afficher
+
+// ajoute ingrédients
 function addIngredient(event) {
   if (event) event.preventDefault();
 
@@ -295,6 +295,7 @@ function addIngredient(event) {
   afficherIngredients();
 }
 
+// supprime ingrédients
 function supprimerIngredient(id) {
   const ingredient = donneesApp.ingredients.find(function(i) {
     return String(i.id) === String(id);
@@ -312,6 +313,7 @@ function supprimerIngredient(id) {
   afficherIngredients();
 }
 
+// affiche ingrédients
 function afficherIngredients() {
   const liste = document.getElementById('ingredients-list');
   if (!liste) return;
@@ -409,9 +411,9 @@ function initialiserRechercheIngredients() {
 }
 
 
-// ═══════════════════════════════════════════════════════════════
-// RECETTES — ajouter, supprimer, afficher
-// ═══════════════════════════════════════════════════════════════
+
+// recettes — ajouter, supprimer, afficher
+
 
 let filtreRecettes = 'all';
 
@@ -604,9 +606,9 @@ function initialiserFiltresRecettes() {
 }
 
 
-// ═══════════════════════════════════════════════════════════════
-// GÉNÉRATION DU MENU
-// ═══════════════════════════════════════════════════════════════
+
+// génération du menu
+
 
 function generateMenu() {
   const budget    = parseFloat(document.getElementById('budget')?.value  || 50);
@@ -749,9 +751,9 @@ function afficherResultatGeneration(menu, budget) {
 }
 
 
-// ═══════════════════════════════════════════════════════════════
-// AFFICHAGE DU MENU — grille des 7 jours
-// ═══════════════════════════════════════════════════════════════
+
+// affichage du menu — grille des 7 jours
+
 
 function afficherMenu() {
   const grille = document.getElementById('weekly-menu');
@@ -841,9 +843,7 @@ function clearMenu() {
 }
 
 
-// ═══════════════════════════════════════════════════════════════
-// RÉSUMÉ FINANCIER ET NUTRITIONNEL
-// ═══════════════════════════════════════════════════════════════
+// résumé financier et nutritionnel
 
 function mettreAJourResume() {
   const menu = donneesApp.menuActuel;
@@ -942,9 +942,8 @@ function afficherBadgeBudget(cout, budget) {
 }
 
 
-// ═══════════════════════════════════════════════════════════════
-// EXPORT PDF
-// ═══════════════════════════════════════════════════════════════
+
+// Export en PDF
 
 async function exportToPDF() {
   const menu = donneesApp.menuActuel;
@@ -1100,9 +1099,8 @@ function chargerJsPDF() {
 }
 
 
-// ═══════════════════════════════════════════════════════════════
-// EXPORT ICS
-// ═══════════════════════════════════════════════════════════════
+
+// Export en ICS
 
 function exportToICS() {
   const menu = donneesApp.menuActuel;
@@ -1332,33 +1330,34 @@ function initUserMenu() {
 // Actions du dropdown
 function goToProfile() {
   closeUserDropdown();
-  console.info('[UserMenu] → Profil utilisateur (page à créer)');
-  showUserMenuFeedback('Profil (page en cours de développement)');
+  window.location.href = 'account.php?tab=profile';
 }
 
 function goToSettings() {
   closeUserDropdown();
-  console.info('[UserMenu] → Paramètres (page à créer)');
-  showUserMenuFeedback('Paramètres (page en cours de développement)');
+  window.location.href = 'account.php?tab=settings';
 }
 
 function goToMyMenus() {
   closeUserDropdown();
-  if (typeof showTab === 'function') showTab('menu');
+  window.location.href = 'account.php?tab=saved-menus';
 }
 
 function goToFavorites() {
   closeUserDropdown();
-  console.info('[UserMenu] → Favoris (page à créer)');
-  showUserMenuFeedback('Favoris (page en cours de développement)');
+  window.location.href = 'account.php?tab=favorites';
 }
 
 function logout() {
   closeUserDropdown();
+  /* Nettoyage client */
   sessionStorage.removeItem('currentUser');
   sessionStorage.removeItem('authToken');
   localStorage.removeItem('currentUser');
-  window.location.href = 'login.php';
+  /* Déconnexion serveur puis redirection */
+  fetch('ajax/logout.php', { method: 'POST', credentials: 'same-origin' })
+    .catch(function () {})
+    .finally(function () { window.location.href = 'login.php'; });
 }
 
 function showUserMenuFeedback(message) {
@@ -1383,6 +1382,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // 1. Charger les données sauvegardées
   charger();
+
+  // 1b. Charger un menu sauvegardé depuis account.php (?load_menu=<id>)
+  (function () {
+    var params  = new URLSearchParams(window.location.search);
+    var menuId  = params.get('load_menu');
+    if (!menuId) return;
+
+    fetch('ajax/load_menu.php?id=' + encodeURIComponent(menuId), {
+      credentials: 'same-origin'
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      if (data.success && data.menu) {
+        donneesApp.menuActuel = data.menu;
+        sauvegarder();
+        afficherMenu();
+        mettreAJourResume();
+        showTab('menu');
+        notifSucces('Menu chargé !');
+        // Nettoyer l'URL sans recharger la page
+        history.replaceState(null, '', 'index.php');
+      } else {
+        notifErreur(data.message || 'Impossible de charger ce menu.');
+      }
+    })
+    .catch(function () { notifErreur('Erreur réseau lors du chargement du menu.'); });
+  })();
 
   // 2. Initialiser les composants de l'interface
   initialiserRechercheIngredients();
