@@ -22,6 +22,17 @@ require_once __DIR__ . '/../app/core/Database.php';
 require_once __DIR__ . '/../app/core/Security.php';
 require_once __DIR__ . '/../app/models/User.php';
 
+// provide a minimal Security class fallback if the real one is missing
+if (!class_exists('Security')) {
+    class Security
+    {
+        public static function sanitize($value)
+        {
+            return htmlspecialchars(trim((string) $value), ENT_QUOTES, 'UTF-8');
+        }
+    }
+}
+
 // garde 
 if (empty($_SESSION['user_id'])) {
     header('Location: login.php');

@@ -1,9 +1,14 @@
 <?php
-require_once __DIR__ . '/config/config.php';
-use app\core\Security;
 use app\middleware\AuthMiddleware;
+use app\core\Security;
+
+session_start();
+
+require_once __DIR__ . '/config/config.php';
+require_once __DIR__ . '/app/core/Security.php';
+require_once __DIR__ . '/app/middleware/AuthMiddleware.php';
 $csrfToken = Security::csrfToken();
-$currentUser = authMiddleware::currentUser();
+$currentUser = AuthMiddleware::currentUser();
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -46,10 +51,10 @@ $currentUser = authMiddleware::currentUser();
             >
                 <!-- En-tête du dropdown -->
                 <div class="dropdown-header" aria-hidden="true">
-                    <span class="dropdown-avatar" id="dropdown-avatar">M</span>
+                    <span class="dropdown-avatar" id="dropdown-avatar">J</span>
                     <div class="dropdown-user-info">
-                        <span class="dropdown-name" id="dropdown-name">Marie Dupont</span>
-                        <span class="dropdown-email" id="dropdown-email">marie.dupont@exemple.fr</span>
+                        <span class="dropdown-name" id="dropdown-name">John Dupont</span>
+                        <span class="dropdown-email" id="dropdown-email">John.dupont@exemple.fr</span>
                     </div>
                 </div>
 
@@ -350,5 +355,6 @@ $currentUser = authMiddleware::currentUser();
     </script>    
     <?php endif; ?>
     <script src="assets/js/app.js"></script>
+    <script src="assets/js/account.js"></script>
 </body>
 </html>
