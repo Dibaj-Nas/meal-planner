@@ -134,36 +134,21 @@ function initLogin() {
         setLoadingState(submitBtn, 'Connexion en cours…');
 
         try {
-            /* ------------------------------------------------------
-               TODO — Brancher l'API PHP :
+            const result = await API.auth.login(email, password);
+            const data = result.data;
 
-               const response = await fetch('api.php/auth/login', {
-                   method:  'POST',
-                   headers: { 'Content-Type': 'application/json' },
-                   body:    JSON.stringify({ email, password })
-               });
+            if (!data.success) {
+                showError(errorBox, errorSpan,
+                    data.error || data.message || 'Email ou mot de passe incorrect.');
+                resetButton(submitBtn, 'Se connecter');
+                return;
+            }
 
-               if (!response.ok) throw new Error('Erreur réseau');
+            if (data.data && data.data.user) {
+                sessionStorage.setItem('currentUser', JSON.stringify(data.data.user));
+            }
 
-               const data = await response.json();
-
-               if (!data.success) {
-                   showError(errorBox, errorSpan,
-                       data.error || 'Email ou mot de passe incorrect.');
-                   resetButton(submitBtn, 'Se connecter');
-                   return;
-               }
-
-               // Optionnel : stocker le token de session
-               // sessionStorage.setItem('authToken', data.token);
-
-               window.location.href = 'index.html';
-             ------------------------------------------------------*/
-
-            /* Simulation réseau (supprimer quand le back est prêt) */
-            await new Promise(resolve => setTimeout(resolve, 1200));
-
-            window.location.href = 'index.html';
+            window.location.href = 'index.php';
 
         } catch (error) {
             console.error('[Login] Erreur :', error);
@@ -302,7 +287,7 @@ function initRegister() {
     function showSuccess() {
         successBox.classList.add('visible');
         errorBox.classList.remove('visible');
-        setTimeout(() => { window.location.href = 'index.html'; }, 1600);
+        setTimeout(() => { window.location.href = 'login.php'; }, 1600);
     }
 
     /* Efface l'erreur dès qu'un champ est modifié */
@@ -326,6 +311,9 @@ function initRegister() {
         if (!lastname)                                            return 'Veuillez saisir votre nom.';
         if (!email || !email.includes('@') || !email.includes('.')) return 'Adresse e-mail invalide.';
         if (password.length < 8)                                  return 'Le mot de passe doit contenir au moins 8 caractères.';
+        if (!/[A-Z]/.test(password))                              return 'Le mot de passe doit contenir au moins une majuscule.';
+        if (!/[0-9]/.test(password))                              return 'Le mot de passe doit contenir au moins un chiffre.';
+        if (!/[^A-Za-z0-9]/.test(password))                       return 'Le mot de passe doit contenir au moins un caractère spécial (!@#…).';
         if (calcStrength(password) < 2)                           return 'Mot de passe trop faible. Ajoutez des majuscules, chiffres ou symboles.';
         if (password !== confirm)                                 return 'Les mots de passe ne correspondent pas.';
         if (!cguCheckbox.checked)                                 return "Vous devez accepter les conditions d'utilisation.";
@@ -353,36 +341,19 @@ function initRegister() {
             lastname:  lastnameInput.value.trim(),
             email:     emailInput.value.trim(),
             password:  pwInput.value,
+            'confirm-password': confirmInput.value,
         };
 
         try {
-            /* ════════════════════════════════════════════════
-               TODO — Brancher l'API PHP :
+            const result = await API.auth.register(payload);
+            const data = result.data;
 
-               const response = await fetch('api.php/auth/register', {
-                   method:  'POST',
-                   headers: { 'Content-Type': 'application/json' },
-                   body:    JSON.stringify(payload)
-               });
-
-               if (!response.ok) throw new Error('Erreur réseau');
-
-               const data = await response.json();
-
-               if (!data.success) {
-                   showError(errorBox, errorSpan,
-                       data.error || "Une erreur est survenue lors de l'inscription.");
-                   resetButton(submitBtn, 'Créer mon compte');
-                   return;
-               }
-
-               showSuccess();
-            ════════════════════════════════════════════════ */
-
-            /* Simulation réseau (supprimer quand le back est prêt) */
-            await new Promise(resolve => setTimeout(resolve, 1400));
-
-            console.log('[Register] Données à envoyer :', payload);
+            if (!data.success) {
+                showError(errorBox, errorSpan,
+                    data.error || data.message || "Une erreur est survenue lors de l'inscription.");
+                resetButton(submitBtn, 'Créer mon compte');
+                return;
+            }
 
             showSuccess();
 

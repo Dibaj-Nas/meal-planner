@@ -33,12 +33,16 @@ class Database
         );
 
         $options = [
-            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,   // Exceptions sur erreur SQL
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,         // Tableaux associatifs
-            PDO::ATTR_EMULATE_PREPARES   => false,                     // Vraies requêtes préparées
-            PDO::ATTR_PERSISTENT         => false,                     // Pas de connexions persistantes
-            PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci",
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES   => false,
+            PDO::ATTR_PERSISTENT         => false,
         ];
+
+        // Charset déjà dans le DSN ; évite PDO::MYSQL_ATTR_INIT_COMMAND (déprécié PHP 8.5+)
+        if (PHP_VERSION_ID < 80500 && defined('PDO::MYSQL_ATTR_INIT_COMMAND')) {
+            $options[PDO::MYSQL_ATTR_INIT_COMMAND] = 'SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci';
+        }
 
         try {
             $this->pdo = new PDO($dsn, DB_USER, DB_PASS, $options);

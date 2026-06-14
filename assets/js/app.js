@@ -1,12 +1,9 @@
 // app.js — Planificateur de Repas
-// Ce fichier gère toute la logique de l'application :
-//   - Onglets de navigation
-//   - Ingrédients (ajout, suppression, affichage)
-//   - Recettes (ajout, suppression, affichage)
-//   - Génération du menu hebdomadaire
-//   - Résumé du coût et des calories
-//   - Export en PDF et en calendrier (ICS)
-//   - Menu utilisateur (dropdown)
+// Données persistées via API Ajax (api.php) + MySQL.
+//   - Ingrédients / recettes : CRUD via API
+//   - Génération menu : API.menus.generate (sauvegarde en BDD)
+//   - Menu courant : cache sessionStorage uniquement
+//   - Export PDF / ICS côté client
 
 'use strict';
 
@@ -49,33 +46,57 @@ const LABELS_REGIME = {
 // stockage — sauvegarder et charger les données
 // ═══════════════════════════════════════════════════════════════
 
-// Données en mémoire (chargées au démarrage)
+// Données en mémoire (source : API MySQL)
 let donneesApp = {
   ingredients: [],
   recettes: [],
   menuActuel: null,
 };
 
-// Sauvegarde dans localStorage
+/** Persiste uniquement le menu courant en session (cache navigateur). */
 function sauvegarder() {
   try {
-    localStorage.setItem('mealplanner_data', JSON.stringify(donneesApp));
+    if (donneesApp.menuActuel) {
+      sessionStorage.setItem('mealplanner_menu', JSON.stringify(donneesApp.menuActuel));
+    } else {
+      sessionStorage.removeItem('mealplanner_menu');
+    }
   } catch (err) {
-    console.warn('Impossible de sauvegarder :', err);
+    console.warn('Impossible de sauvegarder le menu :', err);
   }
 }
 
-// Chargement depuis localStorage (au démarrage)
-function charger() {
+function chargerMenuSession() {
   try {
-    const sauvegarde = localStorage.getItem('mealplanner_data');
-    if (sauvegarde) {
-      const parsed = JSON.parse(sauvegarde);
-      donneesApp = { ...donneesApp, ...parsed };
+    const raw = sessionStorage.getItem('mealplanner_menu');
+    if (raw) {
+      donneesApp.menuActuel = JSON.parse(raw);
     }
   } catch (err) {
-    console.warn('Impossible de charger les données :', err);
+    console.warn('Impossible de charger le menu en session :', err);
   }
+}
+
+/** Charge ingrédients et recettes depuis l'API. */
+function chargerDonneesApi() {
+  return Promise.all([
+    API.ingredients.list(),
+    API.recipes.list(),
+  ]).then(function (results) {
+    const ingRes = results[0].data;
+    const recRes = results[1].data;
+
+    if (ingRes.success) {
+      donneesApp.ingredients = ingRes.data || [];
+    }
+    if (recRes.success) {
+      donneesApp.recettes = recRes.data || [];
+    }
+
+    if (!ingRes.success || !recRes.success) {
+      throw new Error(ingRes.error || recRes.error || 'Erreur de chargement');
+    }
+  });
 }
 
 
@@ -101,6 +122,35 @@ function formaterNutrition(valeur, unite) {
 // Génère un identifiant unique
 function genererID() {
   return '_' + Math.random().toString(36).slice(2, 9);
+}
+
+/** Convertit la réponse API menus en format interne app.js */
+function convertirMenuApi(payload) {
+  var menu = payload.menu || {};
+  var days = payload.days || [];
+  var jours = days.map(function (day, index) {
+    return {
+      nom: day.day_label || JOURS[index] || ('Jour ' + (index + 1)),
+      index: day.day_index != null ? day.day_index : index,
+      repas: {
+        breakfast: day.breakfast || null,
+        lunch: day.lunch || null,
+        dinner: day.dinner || null,
+      },
+    };
+  });
+  var cout = Number(menu.total_cost || 0);
+  return {
+    id: menu.id,
+    budget: Number(menu.budget || 0),
+    personnes: Number(menu.persons || 2),
+    regime: menu.dietary || 'all',
+    cout_total: cout,
+    jours: jours,
+    days: jours.map(function (j) {
+      return { name: j.nom, index: j.index, meals: j.repas };
+    }),
+  };
 }
 
 // Protège contre les attaques XSS
@@ -267,6 +317,7 @@ function addIngredient(event) {
   const calories = parseFloat(document.getElementById('ingredient-calories')?.value || 0);
   const proteines= parseFloat(document.getElementById('ingredient-protein')?.value  || 0);
   const categorie= document.getElementById('ingredient-category')?.value || 'other';
+  const btn      = document.querySelector('.ingredient-form button[type="submit"]');
 
   if (!nom) {
     notifErreur("Veuillez saisir un nom d'ingrédient.");
@@ -277,22 +328,30 @@ function addIngredient(event) {
     return;
   }
 
-  const nouvelIngredient = {
-    id:       genererID(),
-    name:     nom,
-    price:    prix,
-    unit:     unite,
-    calories: calories,
-    protein:  proteines,
-    category: categorie,
-  };
+  if (btn) btn.disabled = true;
 
-  donneesApp.ingredients.push(nouvelIngredient);
-  sauvegarder();
-
-  notifSucces('"' + nom + '" ajouté avec succès.');
-  document.querySelector('.ingredient-form')?.reset();
-  afficherIngredients();
+  API.ingredients.create({
+    name: nom, price: prix, unit: unite,
+    calories: calories, protein: proteines, category: categorie,
+  })
+  .then(function (result) {
+    const data = result.data;
+    if (!data.success) {
+      throw new Error(data.error || 'Échec de la création.');
+    }
+    return chargerDonneesApi();
+  })
+  .then(function () {
+    notifSucces('"' + nom + '" ajouté avec succès.');
+    document.querySelector('.ingredient-form')?.reset();
+    afficherIngredients();
+  })
+  .catch(function (err) {
+    notifErreur(err.message || 'Erreur lors de l\'ajout.');
+  })
+  .finally(function () {
+    if (btn) btn.disabled = false;
+  });
 }
 
 // supprime ingrédients
@@ -304,13 +363,21 @@ function supprimerIngredient(id) {
 
   if (!confirm('Supprimer "' + ingredient.name + '" ?')) return;
 
-  donneesApp.ingredients = donneesApp.ingredients.filter(function(i) {
-    return String(i.id) !== String(id);
+  API.ingredients.delete(id)
+  .then(function (result) {
+    const data = result.data;
+    if (!data.success) {
+      throw new Error(data.error || 'Échec de la suppression.');
+    }
+    return chargerDonneesApi();
+  })
+  .then(function () {
+    notifSucces('"' + ingredient.name + '" supprimé.');
+    afficherIngredients();
+  })
+  .catch(function (err) {
+    notifErreur(err.message || 'Erreur lors de la suppression.');
   });
-  sauvegarder();
-
-  notifSucces('"' + ingredient.name + '" supprimé.');
-  afficherIngredients();
 }
 
 // affiche ingrédients
@@ -451,25 +518,37 @@ function addRecipe(event) {
     }
   });
 
-  const nouvelleRecette = {
-    id:               genererID(),
-    name:             nom,
-    meal_type:        typeRepas,
-    prep_time:        tempsPrep,
-    dietary:          regime,
-    ingredients:      listeIngredients,
-    ingredients_list: listeIngredients.join(', '),
-    estimated_cost:   Math.max(coutEstime, 1.50),
-    calories:         Math.max(caloriesTotal, 300),
-    protein:          Math.max(proteinesTotal, 10),
-  };
+  const btn = document.querySelector('.recipe-form button[type="submit"]');
+  if (btn) btn.disabled = true;
 
-  donneesApp.recettes.push(nouvelleRecette);
-  sauvegarder();
-
-  notifSucces('"' + nom + '" ajoutée avec succès.');
-  document.querySelector('.recipe-form')?.reset();
-  afficherRecettes();
+  API.recipes.create({
+    name: nom,
+    meal_type: typeRepas,
+    prep_time: tempsPrep,
+    dietary: regime,
+    ingredients: listeIngredients,
+    estimated_cost: Math.max(coutEstime, 1.50),
+    calories: Math.max(caloriesTotal, 300),
+    protein: Math.max(proteinesTotal, 10),
+  })
+  .then(function (result) {
+    const data = result.data;
+    if (!data.success) {
+      throw new Error(data.error || 'Échec de la création.');
+    }
+    return chargerDonneesApi();
+  })
+  .then(function () {
+    notifSucces('"' + nom + '" ajoutée avec succès.');
+    document.querySelector('.recipe-form')?.reset();
+    afficherRecettes();
+  })
+  .catch(function (err) {
+    notifErreur(err.message || 'Erreur lors de l\'ajout.');
+  })
+  .finally(function () {
+    if (btn) btn.disabled = false;
+  });
 }
 
 function supprimerRecette(id) {
@@ -480,13 +559,21 @@ function supprimerRecette(id) {
 
   if (!confirm('Supprimer la recette "' + recette.name + '" ?')) return;
 
-  donneesApp.recettes = donneesApp.recettes.filter(function(r) {
-    return String(r.id) !== String(id);
+  API.recipes.delete(id)
+  .then(function (result) {
+    const data = result.data;
+    if (!data.success) {
+      throw new Error(data.error || 'Échec de la suppression.');
+    }
+    return chargerDonneesApi();
+  })
+  .then(function () {
+    notifSucces('"' + recette.name + '" supprimée.');
+    afficherRecettes();
+  })
+  .catch(function (err) {
+    notifErreur(err.message || 'Erreur lors de la suppression.');
   });
-  sauvegarder();
-
-  notifSucces('"' + recette.name + '" supprimée.');
-  afficherRecettes();
 }
 
 function afficherRecettes() {
@@ -623,88 +710,32 @@ function generateMenu() {
     notifErreur('Le nombre de personnes est invalide.');
     return;
   }
-  if (donneesApp.recettes.length < 3) {
-    notifAvert('Ajoutez au moins 3 recettes avant de générer un menu.');
-    return;
-  }
 
   afficherLoader();
 
-  setTimeout(function() {
-    try {
-      const menu = genererMenuLocalement(budget, personnes, regime);
-
-      if (!menu.jours || menu.jours.length === 0) {
-        throw new Error('Aucune recette correspondante trouvée pour ce régime.');
-      }
-
-      donneesApp.menuActuel = menu;
-      sauvegarder();
-
-      mettreAJourResume();
-      afficherResultatGeneration(menu, budget);
-
-      notifSucces('Menu généré avec succès !', 2500);
-
-    } catch (err) {
-      notifErreur('Impossible de générer le menu : ' + err.message);
-      cacherLoader();
+  API.menus.generate({ budget: budget, persons: personnes, dietary: regime })
+  .then(function (result) {
+    const data = result.data;
+    if (!data.success) {
+      throw new Error(data.error || 'Impossible de générer le menu.');
     }
-  }, 600);
-}
 
-function genererMenuLocalement(budget, personnes, regime) {
-  const petitsDej = donneesApp.recettes.filter(function(r) {
-    return r.meal_type === 'breakfast'
-      && (regime === 'all' || r.dietary === regime || r.dietary === 'all');
+    const menu = convertirMenuApi(data.data);
+    if (!menu.jours || menu.jours.length === 0) {
+      throw new Error('Aucune recette correspondante trouvée pour ce régime.');
+    }
+
+    donneesApp.menuActuel = menu;
+    sauvegarder();
+    afficherMenu();
+    mettreAJourResume();
+    afficherResultatGeneration(menu, budget);
+    notifSucces('Menu généré et sauvegardé en base !', 2500);
+  })
+  .catch(function (err) {
+    notifErreur('Impossible de générer le menu : ' + (err.message || 'erreur réseau'));
+    cacherLoader();
   });
-  const dejeuners = donneesApp.recettes.filter(function(r) {
-    return r.meal_type === 'lunch'
-      && (regime === 'all' || r.dietary === regime || r.dietary === 'all');
-  });
-  const diners = donneesApp.recettes.filter(function(r) {
-    return r.meal_type === 'dinner'
-      && (regime === 'all' || r.dietary === regime || r.dietary === 'all');
-  });
-
-  function choisirAuHasard(tableau) {
-    if (tableau.length === 0) return null;
-    return tableau[Math.floor(Math.random() * tableau.length)];
-  }
-
-  let coutTotal = 0;
-
-  const jours = JOURS.map(function(nomJour, index) {
-    const petitDej = choisirAuHasard(petitsDej);
-    const dejeuner = choisirAuHasard(dejeuners);
-    const diner    = choisirAuHasard(diners);
-
-    [petitDej, dejeuner, diner].forEach(function(repas) {
-      if (repas) coutTotal += Number(repas.estimated_cost || 0);
-    });
-
-    return {
-      nom:   nomJour,
-      index: index,
-      repas: {
-        breakfast: petitDej,
-        lunch:     dejeuner,
-        dinner:    diner,
-      },
-    };
-  });
-
-  return {
-    id:         genererID(),
-    budget:     budget,
-    personnes:  personnes,
-    regime:     regime,
-    cout_total: coutTotal,
-    jours:      jours,
-    days:       jours.map(function(j) {
-      return { name: j.nom, index: j.index, meals: j.repas };
-    }),
-  };
 }
 
 function afficherLoader() {
@@ -1195,21 +1226,17 @@ function exportToICS() {
 
 /**
  * Récupère les infos de l'utilisateur connecté.
- * Priorité : sessionStorage → localStorage → données mock.
+ * Priorité : window.__CURRENT_USER__ → sessionStorage.
  */
 function getCurrentUser() {
+  if (window.__CURRENT_USER__) {
+    return window.__CURRENT_USER__;
+  }
   const raw = sessionStorage.getItem('currentUser') || localStorage.getItem('currentUser');
-
   if (raw) {
     try { return JSON.parse(raw); } catch (_) { /* continue */ }
   }
-
-  // Données mock — retirer quand le back-end est prêt
-  return {
-    firstname: 'John',
-    lastname:  'Dupont',
-    email:     'John.dupont@exemple.fr',
-  };
+  return { firstname: '', lastname: '', email: '' };
 }
 
 function getUserInitials(user) {
@@ -1350,14 +1377,16 @@ function goToFavorites() {
 
 function logout() {
   closeUserDropdown();
-  /* Nettoyage client */
   sessionStorage.removeItem('currentUser');
   sessionStorage.removeItem('authToken');
   localStorage.removeItem('currentUser');
-  /* Déconnexion serveur puis redirection */
-  fetch('ajax/logout.php', { method: 'POST', credentials: 'same-origin' })
-    .catch(function () {})
-    .finally(function () { window.location.href = 'login.php'; });
+  if (typeof API !== 'undefined') {
+    API.auth.logout()
+      .catch(function () {})
+      .finally(function () { window.location.href = 'login.php'; });
+  } else {
+    window.location.href = 'login.php';
+  }
 }
 
 function showUserMenuFeedback(message) {
@@ -1380,48 +1409,55 @@ function showUserMenuFeedback(message) {
 
 document.addEventListener('DOMContentLoaded', function() {
 
-  // 1. Charger les données sauvegardées
-  charger();
+  // 1. Initialiser les composants de l'interface
+  initialiserRechercheIngredients();
+  initialiserFiltresRecettes();
 
-  // 1b. Charger un menu sauvegardé depuis account.php (?load_menu=<id>)
+  // 2. Charger ingrédients + recettes depuis l'API
+  chargerDonneesApi()
+  .then(function () {
+    afficherIngredients();
+    afficherRecettes();
+
+    // Menu en cache session (sauf si ?load_menu= présent)
+    var params = new URLSearchParams(window.location.search);
+    if (!params.get('load_menu')) {
+      chargerMenuSession();
+      if (donneesApp.menuActuel) {
+        afficherMenu();
+        mettreAJourResume();
+      }
+    }
+  })
+  .catch(function (err) {
+    notifErreur('Impossible de charger les données : ' + (err.message || 'erreur réseau'));
+    afficherIngredients();
+    afficherRecettes();
+  });
+
+  // 3. Charger un menu sauvegardé depuis account.php (?load_menu=<id>)
   (function () {
     var params  = new URLSearchParams(window.location.search);
     var menuId  = params.get('load_menu');
     if (!menuId) return;
 
-    fetch('ajax/load_menu.php?id=' + encodeURIComponent(menuId), {
-      credentials: 'same-origin'
-    })
-    .then(function (r) { return r.json(); })
-    .then(function (data) {
-      if (data.success && data.menu) {
-        donneesApp.menuActuel = data.menu;
+    API.menus.get(menuId)
+    .then(function (result) {
+      var data = result.data;
+      if (data.success && data.data) {
+        donneesApp.menuActuel = convertirMenuApi(data.data);
         sauvegarder();
         afficherMenu();
         mettreAJourResume();
         showTab('menu');
         notifSucces('Menu chargé !');
-        // Nettoyer l'URL sans recharger la page
         history.replaceState(null, '', 'index.php');
       } else {
-        notifErreur(data.message || 'Impossible de charger ce menu.');
+        notifErreur(data.error || 'Impossible de charger ce menu.');
       }
     })
     .catch(function () { notifErreur('Erreur réseau lors du chargement du menu.'); });
   })();
-
-  // 2. Initialiser les composants de l'interface
-  initialiserRechercheIngredients();
-  initialiserFiltresRecettes();
-
-  // 3. Afficher les données existantes
-  afficherIngredients();
-  afficherRecettes();
-
-  if (donneesApp.menuActuel) {
-    afficherMenu();
-    mettreAJourResume();
-  }
 
   // 4. Initialiser le menu utilisateur
   initUserMenu();

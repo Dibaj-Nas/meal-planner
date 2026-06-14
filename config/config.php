@@ -34,7 +34,7 @@ define('ROOT_PATH', dirname(__DIR__));
 define('APP_PATH', ROOT_PATH . '/app');
  
 /** PHPMAILER_VENDOR = chemin vers le vendor Composer */
-define('PHPMAILER_VENDOR', APP_PATH . '/vendor');
+define('PHPMAILER_VENDOR', APP_PATH . '/models/utlisateurs/vendor');
 
 // 3. la base de données 
 define('DB_HOST',    getenv('DB_HOST')    ?: 'localhost');
@@ -118,3 +118,9 @@ spl_autoload_register(function (string $fqcn): void {
         require_once $file;
     }
 });
+
+// Compatibilité namespaces legacy
+require_once APP_PATH . '/core/Security.php';
+if (!class_exists('App\\Core\\Security', false)) {
+    class_alias('app\\core\\Security', 'App\\Core\\Security');
+}

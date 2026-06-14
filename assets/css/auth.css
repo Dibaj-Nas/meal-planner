@@ -50,7 +50,8 @@ body {
     display: grid;
     grid-template-columns: 1fr 1fr;
     position: relative;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 /* Texture de fond en dégradé radial */
@@ -683,7 +684,9 @@ body::before {
 @media (max-width: 900px) {
     body {
         grid-template-columns: 1fr;
-        grid-template-rows: auto 1fr;
+        grid-template-rows: auto auto;
+        height: auto;
+        overflow-y: auto;
     }
 
     .hero-panel {
@@ -706,6 +709,9 @@ body::before {
 
     .auth-panel {
         padding: 2.5rem 2rem;
+        justify-content: flex-start;
+        overflow-y: visible;
+        min-height: auto;
     }
 
     /* Une seule colonne pour le formulaire register */

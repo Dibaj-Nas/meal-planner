@@ -1,9 +1,19 @@
+<?php
+require_once __DIR__ . '/config/config.php';
+
+use App\Core\Security;
+use App\Middleware\AuthMiddleware;
+
+AuthMiddleware::requireGuest('index.php');
+$csrfToken = Security::csrfToken();
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Créer un compte sur le Planificateur de Repas">
+    <meta name="csrf-token" content="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
     <title>Créer un compte — Planificateur de Repas</title>
     <link rel="icon" href="/assets/img/PR.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -227,6 +237,7 @@
 
     </section>
 
+    <script src="assets/js/api.js"></script>
     <script src="assets/js/auth.js"></script>
 </body>
 </html>

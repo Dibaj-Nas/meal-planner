@@ -1,14 +1,14 @@
 <?php
-use app\middleware\AuthMiddleware;
-use app\core\Security;
-
-session_start();
-
 require_once __DIR__ . '/config/config.php';
-require_once __DIR__ . '/app/core/Security.php';
-require_once __DIR__ . '/app/middleware/AuthMiddleware.php';
-$csrfToken = Security::csrfToken();
+
+use App\Core\Security;
+use App\Middleware\AuthMiddleware;
+
+AuthMiddleware::requireAuth();
+$csrfToken   = Security::csrfToken();
 $currentUser = AuthMiddleware::currentUser();
+$initials    = strtoupper(substr($currentUser['firstname'] ?? 'U', 0, 1) . substr($currentUser['lastname'] ?? '', 0, 1));
+$displayName = trim(($currentUser['firstname'] ?? '') . ' ' . ($currentUser['lastname'] ?? ''));
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -17,6 +17,7 @@ $currentUser = AuthMiddleware::currentUser();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Outil de planification de repas hebdomadaires avec génération automatique, calcul des coûts et apports nutritionnels">
     <title>Planificateur de Repas Hebdomadaires</title>
+    <meta name="csrf-token" content="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
     <link rel="icon" href="assets/img/PR.png">
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
@@ -36,8 +37,8 @@ $currentUser = AuthMiddleware::currentUser();
                 aria-controls="user-dropdown"
                 aria-label="Menu utilisateur"
             >
-                <span class="user-avatar" aria-hidden="true" id="user-avatar">M</span>
-                <span class="user-name" id="user-display-name">Marie Dupont</span>
+                <span class="user-avatar" aria-hidden="true" id="user-avatar"><?= htmlspecialchars($initials, ENT_QUOTES, 'UTF-8') ?></span>
+                <span class="user-name" id="user-display-name"><?= htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8') ?></span>
                 <span class="user-chevron" aria-hidden="true" id="user-chevron">▾</span>
             </button>
 
@@ -51,10 +52,10 @@ $currentUser = AuthMiddleware::currentUser();
             >
                 <!-- En-tête du dropdown -->
                 <div class="dropdown-header" aria-hidden="true">
-                    <span class="dropdown-avatar" id="dropdown-avatar">J</span>
+                    <span class="dropdown-avatar" id="dropdown-avatar"><?= htmlspecialchars($initials, ENT_QUOTES, 'UTF-8') ?></span>
                     <div class="dropdown-user-info">
-                        <span class="dropdown-name" id="dropdown-name">John Dupont</span>
-                        <span class="dropdown-email" id="dropdown-email">John.dupont@exemple.fr</span>
+                        <span class="dropdown-name" id="dropdown-name"><?= htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8') ?></span>
+                        <span class="dropdown-email" id="dropdown-email"><?= htmlspecialchars($currentUser['email'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
                     </div>
                 </div>
 
@@ -90,7 +91,6 @@ $currentUser = AuthMiddleware::currentUser();
             </div>
         </div>
         <!-- ══ FIN BOUTON UTILISATEUR ══ -->
-         <a href="login.php">se connecter</a>
     </header>
 
     <!-- navigation principale -->
@@ -108,7 +108,7 @@ $currentUser = AuthMiddleware::currentUser();
         </button>
 
         <button class="nav-btn" onclick="showTab('menu')" aria-label="Aller à l'onglet visualisation du menu">
-            <span aria-hidden="true"></span>Mon menu
+            <span aria-hidden="true"></span>Mes menues
         </button>
     </nav>
 
@@ -343,17 +343,15 @@ $currentUser = AuthMiddleware::currentUser();
     </footer>
 
     <script src="assets/js/api.js"></script>
-    <?php if ($currentUser): ?>
     <script>
-        // synchronisation session php -> sessionStorage JS
-        sessionStorage.setItem('currentUser', JSON.stringify({
-        id:        <?= (int)$currentUser['id'] ?>,
-        firstname: <?= json_encode($currentUser['firstname']) ?>,
-        lastname:  <?= json_encode($currentUser['lastname']) ?>,
-        email:     <?= json_encode($currentUser['email']) ?>,
-      }));
-    </script>    
-    <?php endif; ?>
+        window.__CURRENT_USER__ = <?= json_encode([
+            'id'        => (int) ($currentUser['id'] ?? 0),
+            'firstname' => $currentUser['firstname'] ?? '',
+            'lastname'  => $currentUser['lastname'] ?? '',
+            'email'     => $currentUser['email'] ?? '',
+        ], JSON_UNESCAPED_UNICODE) ?>;
+        sessionStorage.setItem('currentUser', JSON.stringify(window.__CURRENT_USER__));
+    </script>
     <script src="assets/js/app.js"></script>
     <script src="assets/js/account.js"></script>
 </body>
