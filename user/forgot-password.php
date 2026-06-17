@@ -16,7 +16,7 @@
  */
 declare(strict_types=1);
 
-require_once __DIR__ . '/config/config.php';
+require_once __DIR__ . '/../config/config.php';
 
 use App\Core\Security;
 use App\Middleware\AuthMiddleware;

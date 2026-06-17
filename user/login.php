@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/config/config.php';
+require_once __DIR__ . '/../config/config.php';
 
 use App\Core\Security;
 use App\Middleware\AuthMiddleware;
@@ -18,8 +18,8 @@ $csrfToken = Security::csrfToken();
     <link rel="icon" href="/assets/img/PR.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Commissioner:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/auth.css">
-    <link rel="stylesheet" href="assets/css/theme.css">
+    <link rel="stylesheet" href="/assets/css/auth.css">
+    <link rel="stylesheet" href="/assets/css/theme.css">
     <script>
         (function(){var t=localStorage.getItem('theme')||'light';if(t==='system')t=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t);}());
     </script>
@@ -29,7 +29,7 @@ $csrfToken = Security::csrfToken();
     <!-- ══ PANNEAU GAUCHE — Formulaire ══ -->
     <section class="auth-panel" aria-labelledby="login-heading">
 
-        <div class="brand-logo" aria-hidden="true"><img src="assets/img/logoPlanificateurDeRepas.png" alt="logo de Planificateur de Repas" width="100"></div>
+        <div class="brand-logo" aria-hidden="true"><img src="/assets/img/logoPlanificateurDeRepas.png" alt="logo de Planificateur de Repas" width="100"></div>
         
 
         <h1 class="auth-heading" id="login-heading">
@@ -123,7 +123,7 @@ $csrfToken = Security::csrfToken();
             <!-- Lien vers l'inscription -->
             <p class="auth-switch">
                 Nouveau ici ?
-                <a href="register.php">Créer un compte</a>
+                <a href="/register.php">Créer un compte</a>
             </p>
 
         </form>
@@ -151,8 +151,8 @@ $csrfToken = Security::csrfToken();
         </ul>
     </aside>
 
-    <script src="assets/js/api.js"></script>
-    <script src="assets/js/auth.js"></script>
-    <script src="assets/js/theme.js"></script>
+    <script src="/assets/js/api.js"></script>
+    <script src="/assets/js/auth.js"></script>
+    <script src="/assets/js/theme.js"></script>
 </body>
 </html>

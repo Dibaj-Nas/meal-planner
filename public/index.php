@@ -77,16 +77,26 @@ $routes = [
     '/accueil'   => 'index.html',
     '/home'      => 'index.html',
 
-    '/login'     => 'login.php',
-    '/connexion' => 'login.php',
+    // ── Pages "côté utilisateur" : déplacées dans le dossier user/ ──
+    // On mappe à la fois l'URL propre (/login) ET l'accès direct (/login.php)
+    // vers le fichier dans user/, pour ne casser aucun lien existant.
+    '/login'         => 'user/login.php',
+    '/login.php'     => 'user/login.php',
+    '/connexion'     => 'user/login.php',
 
-    '/register'    => 'register.php',
-    '/inscription' => 'register.php',
+    '/register'      => 'user/register.php',
+    '/register.php'  => 'user/register.php',
+    '/inscription'   => 'user/register.php',
 
-    '/forgot-password'   => 'forgot-password.php',   // demande de réinitialisation
-    '/mot-de-passe-oublie' => 'forgot-password.php',
-    '/reset-password'    => 'reset-password.php',     // nouveau mot de passe
-    '/verify-email'      => 'verify-email.php',       // confirmation d'adresse
+    '/forgot-password'      => 'user/forgot-password.php',   // demande de réinitialisation
+    '/forgot-password.php'  => 'user/forgot-password.php',
+    '/mot-de-passe-oublie'  => 'user/forgot-password.php',
+
+    '/reset-password'       => 'user/reset-password.php',    // nouveau mot de passe
+    '/reset-password.php'   => 'user/reset-password.php',
+
+    '/verify-email'         => 'user/verify-email.php',      // confirmation d'adresse
+    '/verify-email.php'     => 'user/verify-email.php',
 
     '/app'       => 'index.php',                         // l'application (SPA, requiert auth)
     '/dashboard' => 'index.php',
