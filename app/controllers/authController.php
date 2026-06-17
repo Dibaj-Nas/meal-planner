@@ -7,6 +7,7 @@ use App\Core\Api;
 use App\Core\Security;
 use App\Middleware\AuthMiddleware;
 use App\Models\User;
+use App\Services\MailService;
 
 class AuthController
 {
@@ -87,10 +88,23 @@ class AuthController
             Api::json(['success' => false, 'error' => 'Cette adresse e-mail est déjà utilisée.'], 409);
         }
 
+        // ── Envoi des e-mails (bienvenue + vérification d'adresse) ──
+        // On génère un jeton aléatoire, on le stocke (haché) en base, puis on
+        // l'envoie par e-mail. Si l'envoi échoue, le compte reste créé : on
+        // n'interrompt pas l'inscription pour un problème de messagerie.
+        try {
+            $token = Security::generateToken();              // jeton en clair (URL)
+            $this->userModel->saveVerificationToken($userId, $token);
+            MailService::sendWelcome($email, $firstname);
+            MailService::sendVerification($email, $firstname, $token);
+        } catch (\Throwable $e) {
+            error_log('[AuthController::register] Envoi e-mail échoué : ' . $e->getMessage());
+        }
+
         $user = $this->userModel->findById($userId);
         Api::json([
             'success' => true,
-            'message' => 'Compte créé avec succès.',
+            'message' => 'Compte créé avec succès. Vérifiez votre boîte mail pour confirmer votre adresse.',
             'data'    => ['user' => $this->publicUser($user)],
         ], 201);
     }

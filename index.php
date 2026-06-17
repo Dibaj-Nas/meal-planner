@@ -20,12 +20,21 @@ $displayName = trim(($currentUser['firstname'] ?? '') . ' ' . ($currentUser['las
     <meta name="csrf-token" content="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
     <link rel="icon" href="assets/img/PR.png">
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/theme.css">
+    <script>
+        (function(){var t=localStorage.getItem('theme')||'light';if(t==='system')t=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t);}());
+    </script>
 </head>
 <body>
     <!-- en-tête -->
     <header>
-        <h1>Planificateur de Repas</h1>
-        <p class="subtitle">Générez des menus équilibrés et économiques</p>
+        <!-- ══ BOUTON THÈME ══ -->
+        <button id="theme-toggle" type="button" class="theme-toggle-header" aria-label="Changer le thème" title="Mode sombre / clair">🌙</button>
+
+        <div class="header-title">
+            <h1>Planificateur de Repas</h1>
+            <p class="subtitle">Générez des menus équilibrés et économiques</p>
+        </div>
 
         <!-- ══ BOUTON UTILISATEUR ══ -->
         <div class="user-menu-wrapper" id="user-menu-wrapper">
@@ -37,6 +46,7 @@ $displayName = trim(($currentUser['firstname'] ?? '') . ' ' . ($currentUser['las
                 aria-controls="user-dropdown"
                 aria-label="Menu utilisateur"
             >
+                <span class="hamburger-icon" aria-hidden="true"></span>
                 <span class="user-avatar" aria-hidden="true" id="user-avatar"><?= htmlspecialchars($initials, ENT_QUOTES, 'UTF-8') ?></span>
                 <span class="user-name" id="user-display-name"><?= htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8') ?></span>
                 <span class="user-chevron" aria-hidden="true" id="user-chevron">▾</span>
@@ -279,6 +289,16 @@ $displayName = trim(($currentUser['firstname'] ?? '') . ' ' . ($currentUser['las
                 <h2>Mon menu de la semaine</h2>
 
                 <div class="btn-action">
+                    <button class="btn btn-success" onclick="saveCurrentMenu()"
+                        aria-label="Sauvegarder le menu dans Mes menus">
+                        💾 Sauvegarder
+                    </button>
+
+                    <button class="btn btn-primary" onclick="addMenuToFavorites()"
+                        aria-label="Ajouter les recettes du menu dans Mes favoris">
+                        ⭐ Ajouter aux favoris
+                    </button>
+
                     <button class="btn btn-secondary" onclick="exportToPDF()"
                         aria-label="Exporter le menu au format PDF">
                         Exporter PDF
@@ -339,7 +359,15 @@ $displayName = trim(($currentUser['firstname'] ?? '') . ' ' . ($currentUser['las
                 </div>
             </div>
         </div>
-        <p>&copy; 2026 Application de Gestion de Menu réalisé par Dibaj NASRULLAH & JJ Tous droits réservés.</p>
+        <p class="info-footer">Pour tout renseignement visiter
+            <a href="PolitiqueDeConfidentialite.html">Politique de Confidentialité</a>
+            ,
+            <a href="ConditionsDeUtilisation.html">Conditions d'Utilisation</a>
+            ou pour nous contacter
+            <a href="Contact.html">Contact</a>
+            .
+        </p>
+        <p class="info-footer">&copy; 2026 projet réalisé avec le 🤎 Développée par <span>Dibaj NASRULLAH</span> tout droit réservés</p>
     </footer>
 
     <script src="assets/js/api.js"></script>
@@ -354,5 +382,6 @@ $displayName = trim(($currentUser['firstname'] ?? '') . ' ' . ($currentUser['las
     </script>
     <script src="assets/js/app.js"></script>
     <script src="assets/js/account.js"></script>
+    <script src="assets/js/theme.js"></script>
 </body>
 </html>

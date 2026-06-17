@@ -1,0 +1,214 @@
+/*
+  theme.css — Mode sombre (dark mode)
+  Surcharge les variables CSS de style.css, auth.css et pages.css
+  via html[data-theme="dark"] pour une spécificité garantie.
+  Importé dans toutes les pages du projet.
+*/
+
+/* ═══════════════════════════════════════════════════════════════
+   VARIABLES DARK MODE
+   Override complet de toutes les palettes (style.css + auth.css + pages.css)
+═══════════════════════════════════════════════════════════════ */
+html[data-theme="dark"] {
+    /* Fonds */
+    --bg-color:      #1c1714;
+    --primary-color: #261f1b;
+    --bg-light:      #201a16;
+    --bg-hover:      #2e2520;
+    --bg-card:       #2a221d;
+
+    /* Textes */
+    --text-color:    #e8ddd4;
+    --text-activ:    #F3E7D9;
+    --text-medium:   #b8a898;
+    --text-light:    #8a7868;
+    --text-lighter:  #6a5c50;
+    --text-dark:     #e8ddd4;
+
+    /* Couleurs de marque (inchangées) */
+    --secondary-color: #544349;
+    --btn-color:       #CE2A2A;
+    --accent:          #E8963C;
+    --danger:          #CE2A2A;
+    --success:         #5aac74;
+    --warning:         #e07c28;
+
+    /* Titres : olive éclairci pour lisibilité sur fond sombre */
+    --title-color:   #9aad68;
+    --primary:       #8a9c5c;
+    --primary-light: #9aad6a;
+
+    /* Repas */
+    --breakfast: #3d2f1e;
+    --lunch:     #3d2d14;
+    --diner:     #3a2910;
+
+    /* Couleurs secondaires */
+    --secondary:      #CE2A2A;
+    --secondary-dark: #a82222;
+
+    /* Bordures */
+    --border:      rgba(240, 220, 200, 0.14);
+    --border-dark: rgba(240, 220, 200, 0.28);
+
+    /* Ombres */
+    --shadow-sm: 0 2px 8px  rgba(0, 0, 0, 0.35);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45);
+    --shadow-lg: 0 12px 30px rgba(0, 0, 0, 0.55);
+
+    /* Variables spécifiques à auth.css */
+    --success-color: #5aac74;
+
+    /* color-scheme : indique au navigateur le mode pour les contrôles natifs */
+    color-scheme: dark;
+}
+
+/* Transition douce lors du changement de thème */
+html {
+    transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CORRECTIONS DARK MODE — éléments non couverts par les variables
+═══════════════════════════════════════════════════════════════ */
+
+/* Inputs et selects */
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea {
+    background: var(--bg-light);
+    color: var(--text-color);
+    border-color: var(--border);
+}
+
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder {
+    color: var(--text-lighter);
+}
+
+/* Hero panel (auth) */
+html[data-theme="dark"] .hero-panel {
+    background: #1f1a17;
+}
+
+/* Scrollbar */
+html[data-theme="dark"] ::-webkit-scrollbar-track {
+    background: var(--bg-light);
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar-thumb {
+    background: rgba(240, 220, 200, 0.2);
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+    background: rgba(240, 220, 200, 0.35);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BOUTON TOGGLE THÈME — styles de base (partagés)
+═══════════════════════════════════════════════════════════════ */
+#theme-toggle {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 2px solid rgba(243, 231, 217, 0.35);
+    background: rgba(243, 231, 217, 0.1);
+    color: var(--text-activ, #F3E7D9);
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    line-height: 1;
+    transition: background 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
+}
+
+#theme-toggle:hover {
+    background: rgba(243, 231, 217, 0.2);
+    border-color: rgba(243, 231, 217, 0.6);
+    transform: scale(1.08);
+}
+
+#theme-toggle:active {
+    transform: scale(0.94);
+}
+
+#theme-toggle:focus-visible {
+    outline: 3px solid var(--accent, #E8963C);
+    outline-offset: 2px;
+}
+
+/* ── Bouton dans le header principal (index.php) ── */
+
+/* Mobile : dans le flex, style fond clair */
+header:not(.account-header):not(.page-header) #theme-toggle {
+    border-color: var(--border, rgba(84, 67, 73, 0.3));
+    background: var(--bg-card, #F3E7D9);
+    color: var(--text-color, #2A191F);
+    box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.06));
+}
+
+header:not(.account-header):not(.page-header) #theme-toggle:hover {
+    background: var(--bg-hover, #EDE7D3);
+    border-color: var(--border-dark, #544349);
+}
+
+/* Desktop : absolu top-left */
+@media (min-width: 769px) {
+    header:not(.account-header):not(.page-header) #theme-toggle {
+        position: absolute;
+        top: 1.25rem;
+        left: 1.5rem;
+    }
+}
+
+/* ── Bouton dans account-header ── */
+.account-header #theme-toggle {
+    border: 2px solid rgba(243, 231, 217, 0.55);
+    background: rgba(243, 231, 217, 0.18);
+    color: #F3E7D9;
+    font-size: 1.15rem;
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+}
+
+.account-header #theme-toggle:hover {
+    background: rgba(243, 231, 217, 0.3);
+    border-color: rgba(243, 231, 217, 0.85);
+}
+
+/* Bouton injecté par theme.js (fallback flottant sur les pages sans header HTML) */
+body > #theme-toggle {
+    position: fixed;
+    bottom: 1.25rem;
+    right: 1.25rem;
+    z-index: 9999;
+    width: 44px;
+    height: 44px;
+    font-size: 1.2rem;
+    box-shadow: var(--shadow-md, 0 4px 16px rgba(0,0,0,0.15));
+    border: 2px solid var(--border, rgba(84, 67, 73, 0.3));
+    background: var(--bg-card, #F3E7D9);
+    color: var(--text-color, #2A191F);
+}
+
+body > #theme-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: var(--shadow-lg, 0 12px 30px rgba(0,0,0,0.2));
+}
+
+footer > #theme-toggle {
+    color: var(--text-color, #2A191F);
+}
+
+@media (max-width: 480px) {
+    body > #theme-toggle {
+        bottom: 1rem;
+        right: 1rem;
+        width: 40px;
+        height: 40px;
+        font-size: 1.05rem;
+    }
+}

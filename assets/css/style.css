@@ -115,6 +115,16 @@ body {
     }
 }
 
+@keyframes slideFromRight {
+    from { transform: translateX(110%); opacity: 0; }
+    to   { transform: translateX(0);    opacity: 1; }
+}
+
+@keyframes fadeInBackdrop {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
 
 /* CONTENEUR PRINCIPAL */
 
@@ -302,8 +312,8 @@ textarea:hover {
 input:focus,
 select:focus,
 textarea:focus {
-    border-color: var(--secondary-color);
-    box-shadow: 0 0 0 4px rgba(244, 162, 97, 0.1);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(232, 150, 60, 0.25);
     outline: none;
 }
 
@@ -672,6 +682,22 @@ small {
     color: #721c24;
 }
 
+.info-footer {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    text-align: center;
+}
+
+.info-footer a {
+    text-decoration: none;
+    color: var(--btn-color);
+    font-weight: bold;
+}
+
+.info-footer span {
+    font-weight: bold;
+    color: var(--secondary-color);
+}
 /* ═══════════════════════════════════════════════════════════════
    ÉTATS VIDES
 ═══════════════════════════════════════════════════════════════ */
@@ -737,8 +763,23 @@ small {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   EN-TÊTE — wrapper titre
+═══════════════════════════════════════════════════════════════ */
+.header-title {
+    /* sur desktop : centré par text-align du header */
+    display: block;
+    width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════
    BOUTON UTILISATEUR & DROPDOWN
 ═══════════════════════════════════════════════════════════════ */
+
+/* Icône burger — cachée sur desktop, visible sur mobile */
+.hamburger-icon {
+    display: none;
+}
+
 .user-menu-wrapper {
     position: absolute;
     top: 1.8rem;
@@ -928,6 +969,18 @@ small {
     flex-shrink: 0;
 }
 
+/* Backdrop mobile (affiché quand body.menu-open) */
+@media (max-width: 768px) {
+    body.menu-open::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: rgba(42, 25, 31, 0.45);
+        z-index: 999;
+        animation: fadeInBackdrop 0.25s ease forwards;
+    }
+}
+
 /* ═══════════════════════════════════════════════════════════════
    UTILITAIRES
 ═══════════════════════════════════════════════════════════════ */
@@ -980,7 +1033,10 @@ small {
     font-weight: 700;
 }
 
-.account-logo img { border-radius: 6px; }
+.account-logo img {
+     border-radius: 6px; 
+     background-color: white;
+}
 
 .account-back-btn {
     font-size: 0.88rem;
@@ -1021,8 +1077,11 @@ small {
 .account-name {
     font-family: 'Playfair Display', serif;
     font-size: clamp(1.2rem, 3vw, 1.6rem);
+    font-weight: 700;
     color: var(--text-color);
     margin-bottom: 0.25rem;
+    letter-spacing: 0;
+    word-spacing: normal;
 }
 
 .account-meta {
@@ -1578,22 +1637,91 @@ small {
         width: 100%;
     }
 
-    /* Menu utilisateur : avatar seul, position ajustée */
-    .user-menu-wrapper {
-        top: 0.7rem;
-        right: 0.7rem;
+    /* ── Header burger mobile ── */
+    header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        text-align: left;
+        padding: 0.85rem 0.75rem;
+        margin-bottom: 1rem;
+        gap: 1rem;
     }
 
-    .user-name { display: none; }
+    .header-title {
+        flex: 1;
+        min-width: 0;
+    }
+
+    /* Espace entre le titre et le bouton */
+    h1 {
+        font-size: 1.5rem;
+        letter-spacing: -0.5px;
+        margin-bottom: 0.1rem;
+    }
+
+    .subtitle {
+        font-size: 0.68rem;
+        letter-spacing: 0.5px;
+    }
+
+    /* Wrapper : position statique dans le flex */
+    .user-menu-wrapper {
+        position: relative;
+        top: auto;
+        right: auto;
+        flex-shrink: 0;
+        z-index: 1000;
+    }
+
+    /* Bouton burger */
+    .hamburger-icon { display: flex; align-items: center; justify-content: center; }
+    .user-avatar, .user-name, .user-chevron { display: none; }
 
     .user-menu-btn {
-        padding: 0.4rem;
-        gap: 0.3rem;
+        width: 46px;
+        height: 46px;
+        padding: 0;
+        justify-content: center;
+        border-radius: var(--radius-md);
+        font-size: 1.5rem;
     }
 
+    /* Icône ☰ / ✕ via pseudo-élément */
+    .hamburger-icon::before {
+        content: '☰';
+        font-size: 1.4rem;
+        line-height: 1;
+        font-style: normal;
+    }
+
+    .user-menu-btn[aria-expanded="true"] .hamburger-icon::before {
+        content: '✕';
+        font-size: 1.2rem;
+    }
+
+    /* Pas d'arrondi supprimé (utile seulement pour le dropdown desktop) */
+    .user-menu-btn[aria-expanded="true"] {
+        border-radius: var(--radius-md);
+    }
+
+    /* Dropdown : panneau latéral fixe */
     .user-dropdown {
-        min-width: 190px;
+        position: fixed;
+        top: 0;
         right: 0;
+        z-index: 1001;
+        width: min(280px, 88vw);
+        min-height: 100dvh;
+        height: 100dvh;
+        border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+        border-top: 2px solid var(--secondary-color);
+        border-right: none;
+        border-bottom: none;
+        overflow-y: auto;
+        box-shadow: -6px 0 24px rgba(42, 25, 31, 0.22);
+        animation: slideFromRight 0.26s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        transform-origin: right center;
     }
 
     /* Alertes plus compactes */
@@ -1667,21 +1795,68 @@ small {
         flex-shrink: 0;
     }
 
-    /* Menu utilisateur */
-    .user-menu-wrapper {
-        top: 1rem;
-        right: 1rem;
+    /* ── Header burger tablette ── */
+    header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        text-align: left;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.25rem;
+        gap: 1.25rem;
     }
 
-    .user-name { display: none; }
+    .header-title { flex: 1; min-width: 0; }
+
+    .user-menu-wrapper {
+        position: relative;
+        top: auto;
+        right: auto;
+        flex-shrink: 0;
+        z-index: 1000;
+    }
+
+    .hamburger-icon { display: flex; align-items: center; justify-content: center; }
+    .user-avatar, .user-name, .user-chevron { display: none; }
 
     .user-menu-btn {
-        padding: 0.45rem;
-        gap: 0.4rem;
+        width: 48px;
+        height: 48px;
+        padding: 0;
+        justify-content: center;
+        border-radius: var(--radius-md);
+    }
+
+    .hamburger-icon::before {
+        content: '☰';
+        font-size: 1.4rem;
+        line-height: 1;
+    }
+
+    .user-menu-btn[aria-expanded="true"] .hamburger-icon::before {
+        content: '✕';
+        font-size: 1.2rem;
+    }
+
+    .user-menu-btn[aria-expanded="true"] {
+        border-radius: var(--radius-md);
     }
 
     .user-dropdown {
-        min-width: 210px;
+        position: fixed;
+        top: 0;
+        right: 0;
+        z-index: 1001;
+        width: min(300px, 75vw);
+        min-height: 100dvh;
+        height: 100dvh;
+        border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+        border-top: 2px solid var(--secondary-color);
+        border-right: none;
+        border-bottom: none;
+        overflow-y: auto;
+        box-shadow: -6px 0 24px rgba(42, 25, 31, 0.22);
+        animation: slideFromRight 0.26s cubic-bezier(0.4, 0, 0.2, 1) forwards;
     }
 }
 
@@ -1719,13 +1894,54 @@ small {
         flex-direction: row;
     }
 
-    /* Menu utilisateur — position normale */
+    /* Header — retour au centrage desktop */
+    header {
+        display: block;
+        text-align: center;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+
+    /* Menu utilisateur — position absolue normale */
     .user-menu-wrapper {
+        position: absolute;
         top: 1.8rem;
         right: 2rem;
     }
 
-    .user-name { display: inline; }
+    .hamburger-icon { display: none; }
+    .user-avatar   { display: flex; }
+    .user-chevron  { display: inline; }
+    .user-name     { display: inline; }
+
+    .user-menu-btn {
+        width: auto;
+        height: auto;
+        padding: 0.5rem 1rem 0.5rem 0.5rem;
+        border-radius: var(--border-radius);
+        font-size: 0.92rem;
+    }
+
+    .user-menu-btn[aria-expanded="true"] {
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    .user-dropdown {
+        position: absolute;
+        top: calc(100% - 2px);
+        right: 0;
+        width: auto;
+        min-width: 240px;
+        min-height: unset;
+        height: auto;
+        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+        border-top: none;
+        border-right: 2px solid var(--secondary-color);
+        border-bottom: 2px solid var(--secondary-color);
+        animation: dropdownOpen 0.22s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        box-shadow: var(--shadow-lg);
+    }
 }
 
 
@@ -1821,25 +2037,45 @@ small {
         font-size: 1.35rem;
     }
 
-    /* Menu utilisateur */
+    /* Menu utilisateur grand écran */
     .user-menu-wrapper {
+        position: absolute;
         top: 2rem;
         right: 2.5rem;
     }
 
+    .hamburger-icon { display: none; }
+    .user-avatar    { display: flex; width: 38px; height: 38px; font-size: 1rem; }
+    .user-chevron   { display: inline; }
+    .user-name      { display: inline; }
+
     .user-menu-btn {
+        width: auto;
+        height: auto;
         font-size: 1rem;
         padding: 0.6rem 1.2rem 0.6rem 0.6rem;
+        border-radius: var(--border-radius);
     }
 
-    .user-avatar {
-        width: 38px;
-        height: 38px;
-        font-size: 1rem;
+    .user-menu-btn[aria-expanded="true"] {
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
     }
 
     .user-dropdown {
+        position: absolute;
+        top: calc(100% - 2px);
+        right: 0;
+        width: auto;
         min-width: 280px;
+        min-height: unset;
+        height: auto;
+        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+        border-top: none;
+        border-right: 2px solid var(--secondary-color);
+        border-bottom: 2px solid var(--secondary-color);
+        animation: dropdownOpen 0.22s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        box-shadow: var(--shadow-lg);
     }
 
     /* Items légèrement plus grands */

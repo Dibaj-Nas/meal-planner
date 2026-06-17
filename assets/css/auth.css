@@ -434,6 +434,60 @@ body::before {
     transition: color 0.3s;
 }
 
+/* Règles du mot de passe */
+.pw-rules {
+    list-style: none;
+    margin: 0.55rem 0 0;
+    padding: 0.65rem 0.9rem;
+    background: rgba(84, 67, 73, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(84, 67, 73, 0.12);
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.pw-rule {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-lighter);
+    transition: color 0.25s;
+}
+
+.rule-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(84, 67, 73, 0.25);
+    font-size: 0.65rem;
+    flex-shrink: 0;
+    transition: background 0.25s, border-color 0.25s;
+}
+
+.pw-rule.valid {
+    color: var(--success-color);
+}
+
+.pw-rule.valid .rule-icon {
+    background: var(--success-color);
+    border-color: var(--success-color);
+    color: #fff;
+}
+
+.pw-rule.valid .rule-icon::before {
+    content: '✓';
+}
+
+.pw-rule:not(.valid) .rule-icon::before {
+    content: '·';
+    color: rgba(84, 67, 73, 0.4);
+}
+
 /* 7. OPTIONS (login : "Se souvenir" + "Mot de passe oublié") */
 .form-options {
     display: flex;
@@ -678,6 +732,20 @@ body::before {
 
 @keyframes fadeRight {
     to { opacity: 1; transform: translateX(0); }
+
+
+}
+
+.contact-info {
+    font-size: 0.9rem;
+    color: #666;
+    text-align: center
+}
+
+.contact-info a {
+    text-decoration: none;
+    color: var(--btn-color);
+    font-weight: bold;
 }
 
 /* 12. RESPONSIVE */

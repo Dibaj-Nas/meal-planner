@@ -19,6 +19,10 @@ $csrfToken = Security::csrfToken();
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Commissioner:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/auth.css">
+    <link rel="stylesheet" href="assets/css/theme.css">
+    <script>
+        (function(){var t=localStorage.getItem('theme')||'light';if(t==='system')t=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t);}());
+    </script>
 </head>
 <body>
 
@@ -34,6 +38,17 @@ $csrfToken = Security::csrfToken();
         <p class="auth-subheading">
             Connectez-vous pour accéder à vos menus<br>et continuer à bien manger.
         </p>
+
+        <?php /* Bandeau affiché après une réinitialisation réussie (redirigé depuis reset-password.php) */ ?>
+        <?php if (($_GET['reset'] ?? '') === 'success'): ?>
+            <div class="success-msg" role="status"
+                 style="display:flex;gap:.5rem;align-items:center;background:rgba(74,144,96,.12);
+                        border:1px solid rgba(74,144,96,.4);color:#2f6b45;padding:.75rem 1rem;
+                        border-radius:10px;margin-bottom:1rem;font-size:.9rem;">
+                <span aria-hidden="true">✅</span>
+                <span>Mot de passe réinitialisé. Vous pouvez vous connecter.</span>
+            </div>
+        <?php endif; ?>
 
         <form class="auth-form" id="login-form" novalidate>
 
@@ -94,7 +109,7 @@ $csrfToken = Security::csrfToken();
                     <input type="checkbox" id="remember" name="remember">
                     Se souvenir de moi
                 </label>
-                <a href="#" class="forgot-link">Mot de passe oublié ?</a>
+                <a href="/forgot-password.php" class="forgot-link">Mot de passe oublié ?</a>
             </div>
 
             <!-- Bouton de connexion -->
@@ -138,5 +153,6 @@ $csrfToken = Security::csrfToken();
 
     <script src="assets/js/api.js"></script>
     <script src="assets/js/auth.js"></script>
+    <script src="assets/js/theme.js"></script>
 </body>
 </html>

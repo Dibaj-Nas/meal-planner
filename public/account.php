@@ -1,147 +1,45 @@
 <?php
 /**
- * account.php - espace utillisateur (page unique)
- * 
- * TODO
+ * account.php — Espace utilisateur (page unique)
+ *
  * 4 onglets : Profil | Paramètres | Menus sauvegardés | Favoris
- * 
- * méthodes user.php utilisées : 
- *   - get profile  ($userId)
- *   - updateProfile ($userId, $data)
- *   - changePassword ($userId, $current, $new)
- *   - getUserSettings ($userId, $data)
- *   - getSavedMenus($userId)
- *   - deleteWeeklyMenu($userId, $menuId)
- *   - getFavorites($userId)
- *   - removeFavorite($userId, $recipeId)
+ *
+ * Bootstrap via config.php (autoloader PSR-4, session sécurisée, CSRF).
+ * Authentification via AuthMiddleware. Données chargées via le modèle User
+ * et mises à jour côté client via Ajax (account.js + api.js).
+ *
+ * méthodes User utilisées :
+ *   getProfile · updateProfile · changePassword
+ *   getUserSettings · saveUserSettings
+ *   getSavedMenus · deleteWeeklyMenu
+ *   getFavorites · removeFavorite
  */
 declare(strict_types=1);
-session_start();
 
-require_once __DIR__ . '/../app/core/Database.php';
-require_once __DIR__ . '/../app/core/Security.php';
-require_once __DIR__ . '/../app/models/User.php';
+require_once __DIR__ . '/../config/config.php';
 
-// provide a minimal Security class fallback if the real one is missing
-if (!class_exists('Security')) {
-    class Security
-    {
-        public static function sanitize($value)
-        {
-            return htmlspecialchars(trim((string) $value), ENT_QUOTES, 'UTF-8');
-        }
-    }
-}
+use App\Core\Security;
+use App\Middleware\AuthMiddleware;
+use App\Models\User;
 
-// garde 
-if (empty($_SESSION['user_id'])) {
-    header('Location: login.php');
-    exit();
-}
+AuthMiddleware::requireAuth();
 
-$user = new User();
-$userId = (int) $_SESSION['user_id'];
+$user      = new User();
+$userId    = (int) AuthMiddleware::currentUserId();
+$csrfToken = Security::csrfToken();
 
-// onglet actif (paramètre GET et POST)
 $validTabs = ['profile', 'settings', 'saved-menus', 'favorites'];
 $activeTab = $_GET['tab'] ?? 'profile';
 if (!in_array($activeTab, $validTabs, true)) $activeTab = 'profile';
 
-// traitement des action POST
-$success = '';
-$error = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action = $_POST['action'] ?? '';
-
-    /* ── Mise à jour du profil ── */
-    if ($action === 'update_profile') {
-        $activeTab = 'profile';
-        $firstname = Security::sanitize($_POST['firstname'] ?? '');
-        $lastname  = Security::sanitize($_POST['lastname']  ?? '');
-        $email     = Security::sanitize($_POST['email']     ?? '');
-
-        if (!$firstname || !$lastname || !$email) {
-            $error = 'Tous les champs sont obligatoires.';
-        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $error = 'Adresse e-mail invalide.';
-        } else {
-            $r = $user->updateProfile($userId, compact('firstname', 'lastname', 'email'));
-            if ($r['success']) {
-                $_SESSION['user_name']  = "$firstname $lastname";
-                $_SESSION['user_email'] = $email;
-                $success = 'Profil mis à jour avec succès.';
-            } else {
-                $error = $r['message'] ?? 'Erreur lors de la mise à jour.';
-            }
-        }
-    }
-
-    /* ── Changement de mot de passe ── */
-    if ($action === 'change_password') {
-        $activeTab = 'profile';
-        $current = $_POST['current_password'] ?? '';
-        $new     = $_POST['new_password']     ?? '';
-        $confirm = $_POST['confirm_password'] ?? '';
-
-        if (!$current || !$new || !$confirm) {
-            $error = 'Tous les champs mot de passe sont obligatoires.';
-        } elseif ($new !== $confirm) {
-            $error = 'Les nouveaux mots de passe ne correspondent pas.';
-        } elseif (strlen($new) < 8) {
-            $error = 'Minimum 8 caractères requis.';
-        } else {
-            $r = $user->changePassword($userId, $current, $new);
-            $success = $r['success'] ? 'Mot de passe modifié.' : '';
-            $error   = $r['success'] ? '' : ($r['message'] ?? 'Mot de passe actuel incorrect.');
-        }
-    }
-
-    /* ── Sauvegarde des paramètres ── */
-    if ($action === 'save_settings') {
-        $activeTab = 'settings';
-        $r = $user->saveUserSettings($userId, [
-            'dietary_pref'    => Security::sanitize($_POST['dietary_pref']    ?? 'Tous'),
-            'default_budget'  => (float) ($_POST['default_budget']  ?? 0),
-            'default_persons' => (int)   ($_POST['default_persons'] ?? 2),
-            'theme'           => Security::sanitize($_POST['theme'] ?? 'light'),
-            'notifications'   => isset($_POST['notifications']) ? 1 : 0,
-        ]);
-        $success = $r['success'] ? 'Paramètres enregistrés.' : '';
-        $error   = $r['success'] ? '' : ($r['message'] ?? 'Erreur.');
-    }
-
-    /* ── Suppression d'un menu sauvegardé ── */
-    if ($action === 'delete_menu') {
-        $activeTab = 'saved-menus';
-        $menuId = (int) ($_POST['menu_id'] ?? 0);
-        if ($menuId > 0) {
-            $r = $user->deleteWeeklyMenu($userId, $menuId);
-            $success = $r['success'] ? 'Menu supprimé.' : '';
-            $error   = $r['success'] ? '' : ($r['message'] ?? 'Erreur.');
-        }
-    }
-
-    /* ── Suppression d'un favori ── */
-    if ($action === 'remove_favorite') {
-        $activeTab = 'favorites';
-        $recipeId = (int) ($_POST['recipe_id'] ?? 0);
-        if ($recipeId > 0) {
-            $r = $user->removeFavorite($userId, $recipeId);
-            $success = $r['success'] ? 'Recette retirée des favoris.' : '';
-            $error   = $r['success'] ? '' : ($r['message'] ?? 'Erreur.');
-        }
-    }
-}
-
-// changement des données selon l'onglet
+// Données initiales (rechargées aussi via Ajax)
 $profile  = $user->getProfile($userId);
 $settings = $user->getUserSettings($userId);
 $menus    = ($activeTab === 'saved-menus') ? ($user->getSavedMenus($userId) ?? []) : [];
-$favType  = Security::sanitize($_GET['type'] ?? '');
-$favorites= ($activeTab === 'favorites')   ? ($user->getFavorites($userId)  ?? []) : [];
+$favType  = Security::sanitize($_GET['meal_type'] ?? '');
+$favorites= ($activeTab === 'favorites') ? ($user->getFavorites($userId) ?? []) : [];
 if ($favType) {
-    $favorites = array_filter($favorites, fn($r) => ($r['meal_type'] ?? '') === $favType);
+    $favorites = array_values(array_filter($favorites, fn($r) => ($r['meal_type'] ?? '') === $favType));
 }
 
 /* ── Helpers ── */
@@ -153,14 +51,19 @@ $memberSince = isset($profile['created_at'])
     ? (new DateTime($profile['created_at']))->format('d/m/Y')
     : '—';
 
-$dietPrefs  = ['Tous','Végétarien','Vegan','Sans gluten','Sans lactose'];
+$dietPrefs  = ['Tous', 'Végétarien', 'Vegan', 'Sans Porc'];
+$mealTypes  = [
+    'breakfast' => 'Petit-déjeuner',
+    'lunch'     => 'Déjeuner',
+    'dinner'    => 'Dîner',
+];
+$mealLabels = ['all' => 'Tous', 'breakfast' => 'Petit-déj', 'lunch' => 'Déjeuner', 'dinner' => 'Dîner'];
 $themes     = ['light' => '☀️ Clair', 'dark' => '🌙 Sombre', 'system' => '🖥️ Système'];
-$mealTypes  = ['Petit-déjeuner','Déjeuner','Dîner'];
 $DAYS       = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
 $MEALS      = ['Petit-déj','Déjeuner','Dîner'];
 
 function tab_url(string $t): string {
-    return 'account.php?tab=' . $t;
+    return '/account.php?tab=' . $t;
 }
 function sel(string $val, string $current): string {
     return $val === $current ? ' selected' : '';
@@ -178,20 +81,28 @@ function esc(mixed $s): string {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mon compte — Planificateur de Repas</title>
-    <link rel="icon" href="assets/img/PR.png">
+    <meta name="csrf-token" content="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
+    <link rel="icon" href="/assets/img/PR.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Commissioner:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="stylesheet" href="/assets/css/theme.css">
+    <script>
+        (function(){var t=localStorage.getItem('theme')||'light';if(t==='system')t=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t);}());
+    </script>
 </head>
 <body class="account-page">
 
 <!--  EN-TÊTE  -->
 <header class="account-header">
-    <a href="index.php" class="account-logo" aria-label="Retour à l'accueil">
-        <img src="assets/img/logoPlanificateurDeRepas.png" alt="Logo" width="36">
+    <a href="/index.php" class="account-logo" aria-label="Retour à l'accueil">
+        <img src="/assets/img/logoPlanificateurDeRepas.png" alt="Logo" width="36">
         <span>Planificateur de Repas</span>
     </a>
-    <a href="index.php" class="account-back-btn">← Retour à l'application</a>
+    <div style="display:flex;align-items:center;gap:0.75rem;">
+        <button id="theme-toggle" type="button" class="theme-toggle-header" aria-label="Changer le thème" title="Mode sombre / clair">🌙</button>
+        <a href="/index.php" class="account-back-btn">← Retour à l'application</a>
+    </div>
 </header>
 
 <!--  HERO PROFIL -->
@@ -230,12 +141,7 @@ function esc(mixed $s): string {
 <!--  Contenu principal  -->
 <main class="account-main" id="main-content">
 
-    <?php if ($success): ?>
-        <div class="alert alert-success" role="alert">✅ <?= esc($success) ?></div>
-    <?php endif; ?>
-    <?php if ($error): ?>
-        <div class="alert alert-danger" role="alert">⚠️ <?= esc($error) ?></div>
-    <?php endif; ?>
+    <div id="account-alerts" aria-live="polite"></div>
 
 
 <!-- Onglet 1 — Profil -->
@@ -247,8 +153,7 @@ function esc(mixed $s): string {
         <!-- Informations personnelles -->
         <section class="account-card" aria-labelledby="sec-info">
             <h2 id="sec-info">Informations personnelles</h2>
-            <form method="POST" action="account.php?tab=profile" novalidate>
-                <input type="hidden" name="action" value="update_profile">
+            <form id="profile-form" novalidate>
 
                 <div class="form-group">
                     <label for="firstname">Prénom *</label>
@@ -276,8 +181,7 @@ function esc(mixed $s): string {
         <!-- Changer le mot de passe -->
         <section class="account-card" aria-labelledby="sec-pw">
             <h2 id="sec-pw">Changer le mot de passe</h2>
-            <form method="POST" action="account.php?tab=profile" novalidate>
-                <input type="hidden" name="action" value="change_password">
+            <form id="password-form" novalidate>
 
                 <div class="form-group">
                     <label for="current_password">Mot de passe actuel *</label>
@@ -325,8 +229,7 @@ function esc(mixed $s): string {
 
 <?php elseif ($activeTab === 'settings'): ?>
 
-    <form method="POST" action="account.php?tab=settings" novalidate>
-        <input type="hidden" name="action" value="save_settings">
+    <form id="settings-form" novalidate>
         <div class="account-grid">
 
             <!-- Préférences alimentaires -->
@@ -377,6 +280,7 @@ function esc(mixed $s): string {
                         </label>
                     <?php endforeach; ?>
                 </div>
+                <small>Le thème est appliqué immédiatement et mémorisé sur cet appareil.</small>
             </section>
 
             <!-- Notifications -->
@@ -395,7 +299,7 @@ function esc(mixed $s): string {
 
         <div class="account-form-actions">
             <button type="submit" class="btn btn-secondary">💾 Enregistrer les paramètres</button>
-            <a href="index.php" class="btn btn-danger" style="text-decoration:none">Annuler</a>
+            <a href="/index.php" class="btn btn-danger" style="text-decoration:none">Annuler</a>
         </div>
     </form>
 
@@ -408,13 +312,15 @@ function esc(mixed $s): string {
             <div class="account-empty-icon">📋</div>
             <h2>Aucun menu sauvegardé</h2>
             <p>Générez un menu et sauvegardez-le pour le retrouver ici.</p>
-            <a href="index.php" class="btn btn-secondary">Générer un menu</a>
+            <a href="/index.php" class="btn btn-secondary">Générer un menu</a>
         </div>
     <?php else: ?>
-        <div class="account-menus">
+        <div class="account-menus" id="saved-menus-list">
             <?php foreach ($menus as $menu):
                 $mid     = (int) $menu['id'];
-                $mlabel  = esc($menu['label'] ?? 'Menu sans titre');
+                $mlabel  = esc(isset($menu['week_start'])
+                    ? 'Semaine du ' . (new DateTime($menu['week_start']))->format('d/m/Y')
+                    : 'Menu #' . $mid);
                 $mdate   = isset($menu['created_at'])
                     ? (new DateTime($menu['created_at']))->format('d/m/Y à H\hi')
                     : '—';
@@ -435,14 +341,10 @@ function esc(mixed $s): string {
                         </p>
                     </div>
                     <div class="account-menu-actions">
-                        <a href="index.php?load_menu=<?= $mid ?>"
+                        <a href="/index.php?load_menu=<?= $mid ?>"
                            class="btn btn-success btn-sm">📂 Charger</a>
-                        <form method="POST" action="account.php?tab=saved-menus"
-                              onsubmit="return confirm('Supprimer ce menu ?')">
-                            <input type="hidden" name="action"  value="delete_menu">
-                            <input type="hidden" name="menu_id" value="<?= $mid ?>">
-                            <button type="submit" class="btn btn-danger btn-sm">🗑 Supprimer</button>
-                        </form>
+                        <button type="button" class="btn btn-danger btn-sm btn-delete-menu"
+                                data-menu-id="<?= $mid ?>">🗑 Supprimer</button>
                     </div>
                 </div>
 
@@ -476,12 +378,12 @@ function esc(mixed $s): string {
 
     <!-- Filtres type de repas -->
     <nav class="account-filter-tabs" aria-label="Filtrer par type">
-        <a href="account.php?tab=favorites"
+        <a href="/account.php?tab=favorites"
            class="account-filter<?= !$favType ? ' active' : '' ?>">Tous</a>
-        <?php foreach ($mealTypes as $t): ?>
-            <a href="account.php?tab=favorites&type=<?= urlencode($t) ?>"
-               class="account-filter<?= $favType === $t ? ' active' : '' ?>">
-                <?= esc($t) ?>
+        <?php foreach ($mealTypes as $key => $label): ?>
+            <a href="/account.php?tab=favorites&meal_type=<?= urlencode($key) ?>"
+               class="account-filter<?= $favType === $key ? ' active' : '' ?>">
+                <?= esc($label) ?>
             </a>
         <?php endforeach; ?>
     </nav>
@@ -489,24 +391,23 @@ function esc(mixed $s): string {
     <?php if (empty($favorites)): ?>
         <div class="account-empty">
             <div class="account-empty-icon">⭐</div>
-            <h2>Aucun favori<?= $favType ? " pour « $favType »" : '' ?></h2>
+            <h2>Aucun favori<?= $favType ? ' pour « ' . esc($mealLabels[$favType] ?? $favType) . ' »' : '' ?></h2>
             <p>Ajoutez des recettes en favori depuis l'onglet <strong>Mes recettes</strong>.</p>
-            <a href="index.php" class="btn btn-secondary">Voir mes recettes</a>
+            <a href="/index.php" class="btn btn-secondary">Voir mes recettes</a>
         </div>
     <?php else: ?>
-        <div class="account-fav-grid">
+        <div class="account-fav-grid" id="favorites-list">
             <?php foreach ($favorites as $recipe):
                 $rid   = (int) $recipe['id'];
                 $rname = esc($recipe['name']      ?? '');
-                $rmt   = esc($recipe['meal_type'] ?? '');
-                $rft   = esc($recipe['food_type'] ?? '');
+                $rmt   = esc($mealLabels[$recipe['meal_type'] ?? ''] ?? ($recipe['meal_type'] ?? ''));
+                $rft   = esc($recipe['dietary'] ?? '');
                 $rtime = (int)($recipe['prep_time'] ?? 0);
                 $rcost = number_format((float)($recipe['estimated_cost'] ?? 0), 2, ',', ' ');
                 $rcal  = (int)($recipe['calories'] ?? 0);
-                $rprot = (int)($recipe['proteins'] ?? 0);
-                $rings = esc($recipe['ingredients'] ?? '');
-                $rdate = isset($recipe['favorited_at'])
-                    ? (new DateTime($recipe['favorited_at']))->format('d/m/Y')
+                $rprot = (int)($recipe['protein'] ?? 0);
+                $rdate = isset($recipe['created_at'])
+                    ? (new DateTime($recipe['created_at']))->format('d/m/Y')
                     : '—';
             ?>
             <article class="account-fav-card">
@@ -522,17 +423,10 @@ function esc(mixed $s): string {
                     <?php if ($rcal): ?><span class="item-detail">🔥 <?= $rcal ?> kcal</span><?php endif; ?>
                     <?php if ($rprot): ?><span class="item-detail">💪 <?= $rprot ?>g prot.</span><?php endif; ?>
                 </div>
-                <?php if ($rings): ?>
-                    <p class="account-fav-ings">📝 <?= $rings ?></p>
-                <?php endif; ?>
                 <div class="account-fav-footer">
                     <span class="account-fav-date">Ajouté le <?= $rdate ?></span>
-                    <form method="POST" action="account.php?tab=favorites"
-                          onsubmit="return confirm('Retirer des favoris ?')">
-                        <input type="hidden" name="action"    value="remove_favorite">
-                        <input type="hidden" name="recipe_id" value="<?= $rid ?>">
-                        <button type="submit" class="btn btn-danger btn-sm">✕ Retirer</button>
-                    </form>
+                    <button type="button" class="btn btn-danger btn-sm btn-remove-favorite"
+                            data-recipe-id="<?= $rid ?>">✕ Retirer</button>
                 </div>
             </article>
             <?php endforeach; ?>
@@ -542,6 +436,11 @@ function esc(mixed $s): string {
 <?php endif; ?>
 </main>
 
-<script src="assets/js/account.js"></script>
+<script>
+    window.__ACCOUNT_TAB__ = <?= json_encode($activeTab) ?>;
+</script>
+<script src="/assets/js/api.js"></script>
+<script src="/assets/js/account.js"></script>
+<script src="/assets/js/theme.js"></script>
 </body>
 </html>

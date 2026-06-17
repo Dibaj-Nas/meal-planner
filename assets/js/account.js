@@ -16,6 +16,7 @@ const DIET_LABELS = {
   'no-pork': 'Sans Porc',
 };
 
+/** Affiche un message d'alerte (succès/erreur) en haut de l'espace compte. */
 function showAccountAlert(message, type) {
   const box = document.getElementById('account-alerts');
   if (!box) return;
@@ -32,6 +33,7 @@ function showAccountAlert(message, type) {
   }, 4500);
 }
 
+/** Échappe le HTML d'une chaîne pour éviter les injections (XSS). */
 function escHtml(str) {
   return String(str ?? '')
     .replace(/&/g, '&amp;')
@@ -40,6 +42,7 @@ function escHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
+/** Formate une date en français (JJ/MM/AAAA). */
 function formatDateFr(dateStr) {
   if (!dateStr) return '—';
   const d = new Date(dateStr);
@@ -47,6 +50,7 @@ function formatDateFr(dateStr) {
   return d.toLocaleDateString('fr-FR');
 }
 
+/** Formate une date + heure en français (JJ/MM/AAAA à HHhMM). */
 function formatDateTimeFr(dateStr) {
   if (!dateStr) return '—';
   const d = new Date(dateStr);
@@ -54,11 +58,13 @@ function formatDateTimeFr(dateStr) {
   return d.toLocaleDateString('fr-FR') + ' à ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 }
 
+/** Formate un nombre en euros (ex : 12.5 → "12,50 €"). */
 function formatEuro(n) {
   return Number(n || 0).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 /* ── Formulaire profil ── */
+/** Branche le formulaire de profil : envoi Ajax (PUT) + retour visuel. */
 function initProfileForm() {
   const form = document.getElementById('profile-form');
   if (!form) return;
@@ -96,6 +102,7 @@ function initProfileForm() {
 }
 
 /* ── Formulaire mot de passe ── */
+/** Branche le formulaire de changement de mot de passe (validation + Ajax). */
 function initPasswordForm() {
   const form = document.getElementById('password-form');
   if (!form) return;
@@ -126,6 +133,7 @@ function initPasswordForm() {
 }
 
 /* ── Formulaire paramètres ── */
+/** Branche le formulaire des paramètres (régime, budget, nb de personnes). */
 function initSettingsForm() {
   const form = document.getElementById('settings-form');
   if (!form) return;
@@ -155,6 +163,7 @@ function initSettingsForm() {
 }
 
 /* ── Menus sauvegardés ── */
+/** Construit le HTML de la liste des menus sauvegardés. */
 function renderSavedMenus(menus) {
   const container = document.getElementById('saved-menus-list');
   if (!container) return;
@@ -165,7 +174,7 @@ function renderSavedMenus(menus) {
       + '<div class="account-empty-icon">📋</div>'
       + '<h2>Aucun menu sauvegardé</h2>'
       + '<p>Générez un menu pour le retrouver ici.</p>'
-      + '<a href="index.php" class="btn btn-secondary">Générer un menu</a>'
+      + '<a href="/index.php" class="btn btn-secondary">Générer un menu</a>'
       + '</div>';
     return;
   }
@@ -187,7 +196,7 @@ function renderSavedMenus(menus) {
       + ' &nbsp;·&nbsp; Coût : ' + formatEuro(menu.total_cost) + ' €'
       + '</p></div>'
       + '<div class="account-menu-actions">'
-      + '<a href="index.php?load_menu=' + mid + '" class="btn btn-success btn-sm">📂 Charger</a>'
+      + '<a href="/index.php?load_menu=' + mid + '" class="btn btn-success btn-sm">📂 Charger</a>'
       + '<button type="button" class="btn btn-danger btn-sm btn-delete-menu" data-menu-id="' + mid + '">🗑 Supprimer</button>'
       + '</div></div></article>';
   });
@@ -196,6 +205,7 @@ function renderSavedMenus(menus) {
   bindDeleteMenuButtons();
 }
 
+/** Attache l'action "supprimer" à chaque bouton de menu sauvegardé. */
 function bindDeleteMenuButtons() {
   document.querySelectorAll('.btn-delete-menu').forEach(function (btn) {
     btn.addEventListener('click', function () {
@@ -224,6 +234,7 @@ function bindDeleteMenuButtons() {
   });
 }
 
+/** Recharge la liste des menus sauvegardés depuis l'API. */
 function refreshSavedMenus() {
   const list = document.getElementById('saved-menus-list');
   const empty = document.getElementById('saved-menus-empty');
@@ -238,6 +249,7 @@ function refreshSavedMenus() {
 }
 
 /* ── Favoris ── */
+/** Construit le HTML de la grille des recettes favorites. */
 function renderFavorites(favorites) {
   const container = document.getElementById('favorites-list');
   if (!container) return;
@@ -248,7 +260,7 @@ function renderFavorites(favorites) {
       + '<div class="account-empty-icon">⭐</div>'
       + '<h2>Aucun favori</h2>'
       + '<p>Ajoutez des recettes en favori depuis l\'onglet Mes recettes.</p>'
-      + '<a href="index.php" class="btn btn-secondary">Voir mes recettes</a>'
+      + '<a href="/index.php" class="btn btn-secondary">Voir mes recettes</a>'
       + '</div>';
     return;
   }
@@ -279,6 +291,7 @@ function renderFavorites(favorites) {
   bindRemoveFavoriteButtons();
 }
 
+/** Attache l'action "retirer" à chaque bouton de recette favorite. */
 function bindRemoveFavoriteButtons() {
   document.querySelectorAll('.btn-remove-favorite').forEach(function (btn) {
     btn.addEventListener('click', function () {
@@ -368,6 +381,7 @@ document.addEventListener('DOMContentLoaded', function () {
   if (tab === 'saved-menus') refreshSavedMenus();
 });
 
+/** Évalue la robustesse d'un mot de passe (score 0 à 4) pour la barre de force. */
 function calcStrength(pw) {
   let score = 0;
   if (pw.length >= 8) score++;

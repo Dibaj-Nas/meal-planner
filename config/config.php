@@ -51,7 +51,7 @@ define('DB_CHARSET', 'utf8mb4');
 define('SYSTEM_USER_ID', 1);
 
 // 4. application 
-define('APP_URL',          getenv('APP_URL') ?: 'http://localhost:8000');
+define('APP_URL',          getenv('APP_URL') ?: 'http://localhost:3000');
 define('SESSION_LIFETIME', 1800);   // 30 min en secondes
 define('CSRF_SECRET',      getenv('CSRF_SECRET') ?: 'changez-cette-cle-secrete-minimum-64-caracteres-xxxx');
 
@@ -60,9 +60,9 @@ define('CSRF_SECRET',      getenv('CSRF_SECRET') ?: 'changez-cette-cle-secrete-m
 define('MAIL_HOST',       getenv('MAIL_HOST')       ?: 'smtp.gmail.com');
 define('MAIL_PORT',       (int)(getenv('MAIL_PORT') ?: 587));
 define('MAIL_USERNAME',   getenv('MAIL_USERNAME')   ?: 'planificateur.repas@gmail.com');
-define('MAIL_PASSWORD',   getenv('MAIL_PASSWORD')   ?: '');   // TODO : définir en variable d'env
+define('MAIL_PASSWORD',   getenv('MAIL_PASSWORD')   ?: 'efbipoaipjilqjng');
 define('MAIL_ENCRYPTION', 'tls');
-define('MAIL_FROM_EMAIL', getenv('MAIL_FROM') ?: 'noreply@planificateur-repas.com');
+define('MAIL_FROM_EMAIL', getenv('MAIL_FROM') ?: 'planificateur.repas@gmail.com');
 define('MAIL_FROM_NAME',  'Planificateur de Repas');
  
 // 6. session sécurisée

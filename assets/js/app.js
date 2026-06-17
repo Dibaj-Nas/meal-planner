@@ -66,6 +66,7 @@ function sauvegarder() {
   }
 }
 
+/** Recharge le menu courant depuis le cache de session (au chargement de la page). */
 function chargerMenuSession() {
   try {
     const raw = sessionStorage.getItem('mealplanner_menu');
@@ -104,7 +105,7 @@ function chargerDonneesApi() {
 // petit utilitaire
 // ═══════════════════════════════════════════════════════════════
 
-// Formate un nombre en euros (ex: 12.5 → "12,50 €")
+/** Formate un nombre en euros à la française (ex : 12.5 → "12,50 €"). */
 function formaterEuro(valeur) {
   const nombre = Number(valeur || 0);
   return nombre.toLocaleString('fr-FR', {
@@ -119,7 +120,7 @@ function formaterNutrition(valeur, unite) {
   return Math.round(valeur || 0).toLocaleString('fr-FR') + ' ' + u;
 }
 
-// Génère un identifiant unique
+/** Génère un identifiant court et unique (ex : "_k3f9a2b") pour usage local. */
 function genererID() {
   return '_' + Math.random().toString(36).slice(2, 9);
 }
@@ -234,6 +235,7 @@ function showTab(nomOnglet) {
 
 let conteneurToasts = null;
 
+/** Crée (une seule fois) et renvoie le conteneur où s'empilent les notifications. */
 function obtenirConteneurToasts() {
   if (!conteneurToasts) {
     conteneurToasts = document.createElement('div');
@@ -252,7 +254,12 @@ function obtenirConteneurToasts() {
   return conteneurToasts;
 }
 
-// Affiche une notification (type = 'success', 'error', 'warning', 'info')
+/**
+ * Affiche une notification temporaire ("toast") en bas à droite de l'écran.
+ * @param {string} message Texte à afficher.
+ * @param {string} type    'success' | 'error' | 'warning' | 'info' (change la couleur).
+ * @param {number} [duree] Durée d'affichage en ms (3000 par défaut).
+ */
 function afficherNotification(message, type, duree) {
   const dureeMs = duree || 3000;
 
@@ -298,6 +305,7 @@ function afficherNotification(message, type, duree) {
   }, dureeMs);
 }
 
+// Raccourcis pratiques par type de notification.
 function notifSucces(msg, duree) { afficherNotification(msg, 'success', duree); }
 function notifErreur(msg, duree) { afficherNotification(msg, 'error',   duree); }
 function notifAvert(msg, duree)  { afficherNotification(msg, 'warning', duree); }
@@ -307,7 +315,11 @@ function notifInfo(msg, duree)   { afficherNotification(msg, 'info',    duree); 
 
 // ingrédients — ajouter, supprimer, afficher
 
-// ajoute ingrédients
+/**
+ * Ajoute un ingrédient : lit le formulaire, valide, envoie à l'API,
+ * recharge les données puis rafraîchit l'affichage.
+ * @param {Event} event Événement de soumission du formulaire (pour bloquer le rechargement).
+ */
 function addIngredient(event) {
   if (event) event.preventDefault();
 
@@ -354,7 +366,7 @@ function addIngredient(event) {
   });
 }
 
-// supprime ingrédients
+/** Supprime un ingrédient (après confirmation) puis rafraîchit la liste. */
 function supprimerIngredient(id) {
   const ingredient = donneesApp.ingredients.find(function(i) {
     return String(i.id) === String(id);
@@ -380,7 +392,7 @@ function supprimerIngredient(id) {
   });
 }
 
-// affiche ingrédients
+/** Construit et affiche la liste HTML des ingrédients de l'utilisateur. */
 function afficherIngredients() {
   const liste = document.getElementById('ingredients-list');
   if (!liste) return;
@@ -454,6 +466,7 @@ function afficherIngredients() {
   });
 }
 
+/** Branche la barre de recherche d'ingrédients (filtre en temps réel). */
 function initialiserRechercheIngredients() {
   const liste = document.getElementById('ingredients-list');
   if (!liste || document.getElementById('ing-search')) return;
@@ -484,6 +497,7 @@ function initialiserRechercheIngredients() {
 
 let filtreRecettes = 'all';
 
+/** Ajoute une recette : lit le formulaire, valide, envoie à l'API, rafraîchit. */
 function addRecipe(event) {
   if (event) event.preventDefault();
 
@@ -551,6 +565,7 @@ function addRecipe(event) {
   });
 }
 
+/** Supprime une recette (après confirmation) puis rafraîchit la liste. */
 function supprimerRecette(id) {
   const recette = donneesApp.recettes.find(function(r) {
     return String(r.id) === String(id);
@@ -576,6 +591,7 @@ function supprimerRecette(id) {
   });
 }
 
+/** Construit et affiche la liste HTML des recettes (selon les filtres actifs). */
 function afficherRecettes() {
   const liste = document.getElementById('recipes-list');
   if (!liste) return;
@@ -641,6 +657,7 @@ function afficherRecettes() {
   });
 }
 
+/** Branche les filtres de recettes (type de repas, régime alimentaire). */
 function initialiserFiltresRecettes() {
   const liste = document.getElementById('recipes-list');
   if (!liste || document.querySelector('.filter-bar')) return;
@@ -738,6 +755,7 @@ function generateMenu() {
   });
 }
 
+/** Affiche un indicateur de chargement pendant la génération du menu. */
 function afficherLoader() {
   const zone = document.getElementById('generation-result');
   if (!zone) return;
@@ -750,11 +768,13 @@ function afficherLoader() {
     + '</div>';
 }
 
+/** Masque l'indicateur de chargement. */
 function cacherLoader() {
   const zone = document.getElementById('generation-result');
   if (zone) zone.innerHTML = '';
 }
 
+/** Affiche le bandeau récapitulatif après une génération réussie (coût vs budget). */
 function afficherResultatGeneration(menu, budget) {
   const zone = document.getElementById('generation-result');
   if (!zone) return;
@@ -786,6 +806,7 @@ function afficherResultatGeneration(menu, budget) {
 // affichage du menu — grille des 7 jours
 
 
+/** Dessine la grille du menu de la semaine (7 cartes de jour). */
 function afficherMenu() {
   const grille = document.getElementById('weekly-menu');
   if (!grille) return;
@@ -819,6 +840,7 @@ function afficherMenu() {
   });
 }
 
+/** Génère le HTML d'une carte "jour" (avec ses 3 créneaux de repas). */
 function creerCarteJour(jour, index) {
   const carte = document.createElement('section');
   carte.className = 'day-card';
@@ -839,6 +861,7 @@ function creerCarteJour(jour, index) {
   return carte;
 }
 
+/** Génère le HTML d'un créneau de repas (petit-déj / déjeuner / dîner). */
 function creerSlotRepas(type, recette) {
   const infosType = TYPES_REPAS[type] || TYPES_REPAS.dinner;
   const styleFond = 'background:' + infosType.couleur + '; border-radius:var(--radius-sm);';
@@ -861,6 +884,7 @@ function creerSlotRepas(type, recette) {
     + '</div>';
 }
 
+/** Efface le menu courant (mémoire + cache de session) après confirmation. */
 function clearMenu() {
   if (!confirm('Effacer le menu de la semaine ?')) return;
 
@@ -873,9 +897,68 @@ function clearMenu() {
   notifInfo('Menu effacé.');
 }
 
+function saveCurrentMenu() {
+  var menu = donneesApp.menuActuel;
+  if (!menu || !menu.jours || menu.jours.length === 0) {
+    notifAvert("Générez d'abord un menu avant de le sauvegarder.");
+    return;
+  }
+
+  API.menus.save({
+    menu_id: menu.id,
+    budget: menu.budget,
+    persons: menu.personnes,
+    dietary: menu.regime,
+  })
+  .then(function (result) {
+    var data = result.data;
+    if (!data.success) throw new Error(data.error || 'Impossible de sauvegarder.');
+    notifSucces('Menu sauvegardé ! Retrouvez-le dans "Mes menus sauvegardés".', 4000);
+  })
+  .catch(function (err) {
+    notifErreur(err.message || 'Erreur lors de la sauvegarde.');
+  });
+}
+
+function addMenuToFavorites() {
+  var menu = donneesApp.menuActuel;
+  if (!menu || !menu.jours || menu.jours.length === 0) {
+    notifAvert("Générez d'abord un menu.");
+    return;
+  }
+
+  var recipeIds = new Set();
+  menu.jours.forEach(function (jour) {
+    var repas = jour.repas || {};
+    ['breakfast', 'lunch', 'dinner'].forEach(function (type) {
+      var recette = repas[type];
+      if (recette) {
+        var rid = recette.recipe_id ?? recette.id;
+        if (rid) recipeIds.add(Number(rid));
+      }
+    });
+  });
+
+  if (recipeIds.size === 0) {
+    notifAvert('Aucune recette identifiée dans le menu.');
+    return;
+  }
+
+  Promise.all(Array.from(recipeIds).map(function (id) {
+    return API.account.addFavorite(id).catch(function () {});
+  }))
+  .then(function () {
+    notifSucces(recipeIds.size + ' recette(s) ajoutée(s) à vos favoris !', 4000);
+  })
+  .catch(function () {
+    notifErreur('Erreur lors de l\'ajout aux favoris.');
+  });
+}
+
 
 // résumé financier et nutritionnel
 
+/** Recalcule et affiche le résumé financier + nutritionnel du menu courant. */
 function mettreAJourResume() {
   const menu = donneesApp.menuActuel;
 
@@ -915,6 +998,7 @@ function mettreAJourResume() {
   afficherBadgeBudget(coutTotal, Number(menu.budget || 0));
 }
 
+/** Remet à zéro l'affichage du résumé (quand il n'y a plus de menu). */
 function reinitialiserResume() {
   const el = function(id) { return document.getElementById(id); };
   if (el('total-cost'))       el('total-cost').textContent       = '0,00 €';
@@ -925,6 +1009,7 @@ function reinitialiserResume() {
   if (el('calories-per-day')) el('calories-per-day').textContent = '0 kcal';
 }
 
+/** Anime un nombre de 0 jusqu'à sa valeur cible (effet "compteur qui défile"). */
 function animerCompteur(element, valeurCible, formateur, dureeMs) {
   if (!element) return;
   const duree = dureeMs || 800;
@@ -943,6 +1028,7 @@ function animerCompteur(element, valeurCible, formateur, dureeMs) {
  * Affiche le badge budget via des classes CSS (plus de style inline).
  * Les classes .badge-ok et .badge-warn sont définies dans style.css.
  */
+/** Affiche un badge coloré indiquant si le menu respecte le budget ou le dépasse. */
 function afficherBadgeBudget(cout, budget) {
   let badge = document.getElementById('budget-badge');
 
@@ -1115,6 +1201,7 @@ async function exportToPDF() {
   notifSucces('PDF téléchargé avec succès !');
 }
 
+/** Charge dynamiquement la librairie jsPDF (seulement au moment de l'export PDF). */
 function chargerJsPDF() {
   if (window.jspdf && window.jspdf.jsPDF) {
     return Promise.resolve(window.jspdf.jsPDF);
@@ -1133,6 +1220,7 @@ function chargerJsPDF() {
 
 // Export en ICS
 
+/** Exporte le menu au format ICS (calendrier) téléchargeable. */
 function exportToICS() {
   const menu = donneesApp.menuActuel;
 
@@ -1228,6 +1316,7 @@ function exportToICS() {
  * Récupère les infos de l'utilisateur connecté.
  * Priorité : window.__CURRENT_USER__ → sessionStorage.
  */
+/** Récupère l'utilisateur courant (injecté par PHP dans sessionStorage). */
 function getCurrentUser() {
   if (window.__CURRENT_USER__) {
     return window.__CURRENT_USER__;
@@ -1239,16 +1328,19 @@ function getCurrentUser() {
   return { firstname: '', lastname: '', email: '' };
 }
 
+/** Construit les initiales d'un utilisateur (ex : "Dibaj N." → "DN"). */
 function getUserInitials(user) {
   const f = (user.firstname || '').trim().charAt(0).toUpperCase();
   const l = (user.lastname  || '').trim().charAt(0).toUpperCase();
   return (f + l) || '?';
 }
 
+/** Construit le nom affiché de l'utilisateur (prénom + nom). */
 function getUserDisplayName(user) {
   return `${user.firstname || ''} ${user.lastname || ''}`.trim() || 'Utilisateur';
 }
 
+/** Remplit l'avatar et le nom de l'utilisateur dans l'en-tête. */
 function renderUserInfo() {
   const user     = getCurrentUser();
   const initials = getUserInitials(user);
@@ -1267,6 +1359,7 @@ function renderUserInfo() {
   if (dropEmailEl)  dropEmailEl.textContent = user.email || '';
 }
 
+/** Ouvre ou ferme le menu déroulant utilisateur selon son état actuel. */
 function toggleUserDropdown() {
   const btn      = document.getElementById('user-menu-btn');
   const dropdown = document.getElementById('user-dropdown');
@@ -1283,6 +1376,7 @@ function openUserDropdown() {
 
   btn.setAttribute('aria-expanded', 'true');
   dropdown.removeAttribute('hidden');
+  document.body.classList.add('menu-open');
 
   const firstItem = dropdown.querySelector('.dropdown-item');
   if (firstItem) firstItem.focus();
@@ -1293,11 +1387,14 @@ function closeUserDropdown() {
   const dropdown = document.getElementById('user-dropdown');
   if (!btn || !dropdown) return;
 
+  const wasOpen = btn.getAttribute('aria-expanded') === 'true';
   btn.setAttribute('aria-expanded', 'false');
   dropdown.setAttribute('hidden', '');
-  btn.focus();
+  document.body.classList.remove('menu-open');
+  if (wasOpen) btn.focus();
 }
 
+/** Initialise le menu utilisateur : clics, fermeture au clic extérieur, touche Échap. */
 function initUserMenu() {
   renderUserInfo();
 
@@ -1357,22 +1454,22 @@ function initUserMenu() {
 // Actions du dropdown
 function goToProfile() {
   closeUserDropdown();
-  window.location.href = 'account.php?tab=profile';
+  window.location.href = 'public/account.php?tab=profile';
 }
 
 function goToSettings() {
   closeUserDropdown();
-  window.location.href = 'account.php?tab=settings';
+  window.location.href = 'public/account.php?tab=settings';
 }
 
 function goToMyMenus() {
   closeUserDropdown();
-  window.location.href = 'account.php?tab=saved-menus';
+  window.location.href = 'public/account.php?tab=saved-menus';
 }
 
 function goToFavorites() {
   closeUserDropdown();
-  window.location.href = 'account.php?tab=favorites';
+  window.location.href = 'public/account.php?tab=favorites';
 }
 
 function logout() {
@@ -1383,12 +1480,13 @@ function logout() {
   if (typeof API !== 'undefined') {
     API.auth.logout()
       .catch(function () {})
-      .finally(function () { window.location.href = 'login.php'; });
+      .finally(function () { window.location.href = 'index.html'; });
   } else {
-    window.location.href = 'login.php';
+    window.location.href = 'index.html';
   }
 }
 
+/** Affiche un petit retour visuel dans le menu utilisateur (action en cours). */
 function showUserMenuFeedback(message) {
   const region = document.getElementById('generation-result');
   if (!region) return;

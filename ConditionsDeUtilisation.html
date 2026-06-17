@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conditions d'utilisation — Planificateur de Repas</title>
+    <meta name="description" content="Conditions générales d'utilisation du Planificateur de Repas.">
+    <link rel="icon" href="assets/img/PR.png">
+    <link rel="stylesheet" href="assets/css/pages.css">
+    <link rel="stylesheet" href="assets/css/theme.css">
+    <script>
+        (function(){var t=localStorage.getItem('theme')||'light';if(t==='system')t=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t);}());
+    </script>
+</head>
+<body>
+
+    <!-- ══ EN-TÊTE ══ -->
+    <header class="page-header">
+        <a href="index.html" class="logo" aria-label="Retour à l'accueil">
+            <img src="assets/img/logoPlanificateurDeRepas.png" alt="Logo Planificateur de Repas">
+            <span>Planificateur de Repas</span>
+        </a>
+        <nav class="header-nav" aria-label="Navigation secondaire">
+            <button id="theme-toggle" type="button" aria-label="Changer le thème" title="Mode sombre / clair"></button>
+            <a href="index.html" class="btn-back btn-back--outline">← Accueil</a>
+            <a href="login.php" class="btn-back btn-back--solid">Se connecter</a>
+        </nav>
+    </header>
+
+    <!-- ══ BANDEAU HÉRO ══ -->
+    <section class="page-hero" aria-labelledby="hero-title">
+        <span class="page-hero-tag">Légal</span>
+        <h1 id="hero-title">Conditions d'utilisation</h1>
+        <p>Les règles qui encadrent l'utilisation du Planificateur de Repas.</p>
+    </section>
+
+    <!-- ══ CONTENU ══ -->
+    <main class="page-main" id="main-content">
+
+        <div class="update-date">
+            <span>📅</span> Dernière mise à jour : 16 juin 2026
+        </div>
+
+        <!-- Acceptation -->
+        <section class="content-section" aria-labelledby="s1">
+            <h2 id="s1"><span class="section-icon">✅</span> Acceptation des conditions</h2>
+            <p>
+                En accédant au <strong>Planificateur de Repas</strong> (ci-après « l'Application »)
+                et en créant un compte, vous acceptez pleinement et sans réserve les présentes
+                Conditions Générales d'Utilisation (CGU).
+            </p>
+            <p>
+                Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser l'Application.
+                Ces CGU peuvent être modifiées à tout moment ; la version en vigueur est celle affichée
+                sur cette page avec la date de mise à jour indiquée ci-dessus.
+            </p>
+            <div class="highlight-box">
+                <strong>Important :</strong> l'utilisation de l'Application est réservée aux personnes
+                majeures ou aux mineurs disposant d'une autorisation parentale.
+            </div>
+        </section>
+
+        <!-- Description du service -->
+        <section class="content-section" aria-labelledby="s2">
+            <h2 id="s2"><span class="section-icon">🍽️</span> Description du service</h2>
+            <p>
+                Le Planificateur de Repas est une application web permettant aux utilisateurs de :
+            </p>
+            <ul>
+                <li>Gérer une bibliothèque personnelle d'ingrédients et de recettes.</li>
+                <li>Générer automatiquement des menus hebdomadaires en fonction d'un budget et de préférences alimentaires.</li>
+                <li>Sauvegarder, consulter et exporter leurs menus (PDF, ICS).</li>
+                <li>Marquer des recettes en favoris et gérer leurs paramètres de compte.</li>
+            </ul>
+            <p>
+                L'Application est fournie à titre personnel et non commercial. Les informations
+                nutritionnelles et les estimations de coût sont données à titre indicatif.
+            </p>
+        </section>
+
+        <!-- Compte utilisateur -->
+        <section class="content-section" aria-labelledby="s3">
+            <h2 id="s3"><span class="section-icon">👤</span> Compte utilisateur</h2>
+            <h3>Création du compte</h3>
+            <p>
+                Pour accéder aux fonctionnalités de l'Application, vous devez créer un compte en fournissant
+                une adresse e-mail valide et un mot de passe. Vous êtes responsable de l'exactitude
+                des informations fournies lors de l'inscription.
+            </p>
+            <h3>Confidentialité des identifiants</h3>
+            <p>
+                Vous vous engagez à maintenir la confidentialité de vos identifiants de connexion.
+                Toute activité réalisée depuis votre compte est présumée être de votre fait.
+                En cas de compromission, signalez-le immédiatement via le <a href="Contact.html">formulaire de contact</a>.
+            </p>
+            <h3>Suspension et suppression</h3>
+            <p>
+                Nous nous réservons le droit de suspendre ou supprimer tout compte en cas de violation
+                des présentes CGU, sans préavis ni indemnité. Vous pouvez supprimer votre compte
+                à tout moment depuis la section « Paramètres » de votre profil.
+            </p>
+        </section>
+
+        <!-- Règles d'utilisation -->
+        <section class="content-section" aria-labelledby="s4">
+            <h2 id="s4"><span class="section-icon">📏</span> Règles d'utilisation</h2>
+            <p>En utilisant l'Application, vous vous engagez à <strong>ne pas</strong> :</p>
+            <ul>
+                <li>Tenter d'accéder aux données d'autres utilisateurs.</li>
+                <li>Soumettre des contenus illicites, offensants, diffamatoires ou portant atteinte aux droits de tiers.</li>
+                <li>Utiliser l'Application à des fins commerciales sans autorisation écrite préalable.</li>
+                <li>Procéder à des tentatives d'injection SQL, XSS, CSRF ou tout autre type d'attaque informatique.</li>
+                <li>Automatiser des requêtes de manière abusive (scraping, DoS, etc.).</li>
+                <li>Partager vos identifiants avec des tiers ou créer plusieurs comptes.</li>
+                <li>Tenter de contourner les mécanismes d'authentification ou de sécurité.</li>
+            </ul>
+            <div class="info-box">
+                Toute violation de ces règles peut entraîner la suspension immédiate du compte et,
+                le cas échéant, des poursuites judiciaires.
+            </div>
+        </section>
+
+        <!-- Propriété intellectuelle -->
+        <section class="content-section" aria-labelledby="s5">
+            <h2 id="s5"><span class="section-icon">©️</span> Propriété intellectuelle</h2>
+            <p>
+                L'ensemble des éléments de l'Application — code source, design, textes, logos, icônes —
+                est la propriété exclusive de ses développeurs (Dibaj Nasrullah &amp; JJ) et est protégé
+                par les lois françaises et internationales sur la propriété intellectuelle.
+            </p>
+            <p>
+                Vous êtes propriétaire du <strong>contenu que vous créez</strong> (vos recettes, ingrédients,
+                menus). En le soumettant, vous accordez une licence limitée nous permettant de stocker
+                et afficher ce contenu dans le cadre du service.
+            </p>
+            <p>
+                Toute reproduction, représentation ou exploitation non autorisée est strictement interdite.
+            </p>
+        </section>
+
+        <!-- Responsabilité -->
+        <section class="content-section" aria-labelledby="s6">
+            <h2 id="s6"><span class="section-icon">⚠️</span> Limitation de responsabilité</h2>
+            <p>
+                L'Application est fournie « en l'état », sans garantie d'aucune sorte. Nous ne saurions
+                être tenus responsables :
+            </p>
+            <ul>
+                <li>D'erreurs ou d'imprécisions dans les informations nutritionnelles ou les estimations de coût.</li>
+                <li>D'une interruption temporaire du service pour maintenance ou incident technique.</li>
+                <li>De pertes de données résultant d'une défaillance technique imprévue.</li>
+                <li>Des décisions alimentaires ou financières prises sur la base des menus générés.</li>
+            </ul>
+            <div class="highlight-box">
+                <strong>Conseil médical :</strong> les informations fournies par l'Application sont
+                indicatives et ne remplacent pas l'avis d'un professionnel de santé ou d'un nutritionniste.
+            </div>
+        </section>
+
+        <!-- Disponibilité -->
+        <section class="content-section" aria-labelledby="s7">
+            <h2 id="s7"><span class="section-icon">🔧</span> Disponibilité du service</h2>
+            <p>
+                Nous nous efforçons d'assurer la disponibilité de l'Application 24h/24 et 7j/7.
+                Cependant, nous nous réservons le droit de suspendre l'accès pour des opérations de
+                maintenance, des mises à jour ou en cas d'incident, sans préavis ni indemnité.
+            </p>
+            <p>
+                Nous ne garantissons pas que l'Application sera exempte d'erreurs ou de bugs.
+                Des corrections sont apportées régulièrement.
+            </p>
+        </section>
+
+        <!-- Loi applicable -->
+        <section class="content-section" aria-labelledby="s8">
+            <h2 id="s8"><span class="section-icon">🏛️</span> Droit applicable et juridiction</h2>
+            <p>
+                Les présentes CGU sont régies par le <strong>droit français</strong>. Tout litige relatif
+                à leur interprétation ou à leur exécution sera soumis aux tribunaux compétents du ressort
+                du siège des développeurs, sauf disposition légale contraire.
+            </p>
+            <p>
+                En cas de litige, une solution amiable sera recherchée en priorité. Vous pouvez
+                nous contacter via le <a href="Contact.html">formulaire de contact</a>.
+            </p>
+        </section>
+
+        <!-- Modifications -->
+        <section class="content-section" aria-labelledby="s9">
+            <h2 id="s9"><span class="section-icon">✏️</span> Modifications des CGU</h2>
+            <p>
+                Nous nous réservons le droit de modifier les présentes CGU à tout moment.
+                Les modifications prennent effet dès leur publication sur cette page.
+                En continuant à utiliser l'Application après une modification, vous acceptez
+                les nouvelles conditions.
+            </p>
+        </section>
+
+        <!-- Contact -->
+        <section class="content-section" aria-labelledby="s9b">
+            <h2 id="s9b"><span class="section-icon">📬</span> Contact</h2>
+            <p>
+                Pour toute question relative aux présentes CGU, contactez-nous via notre
+                <a href="Contact.html">formulaire de contact</a>.
+            </p>
+        </section>
+
+    </main>
+
+    <!-- ══ FOOTER ══ -->
+    <footer class="page-footer">
+        <nav class="footer-links" aria-label="Pages légales">
+            <a href="PolitiqueDeConfidentialite.html">Politique de confidentialité</a>
+            <span class="footer-sep" aria-hidden="true">·</span>
+            <a href="ConditionsDeUtilisation.html" aria-current="page">Conditions d'utilisation</a>
+            <span class="footer-sep" aria-hidden="true">·</span>
+            <a href="Contact.html">Contact</a>
+            <span class="footer-sep" aria-hidden="true">·</span>
+            <a href="index.html">Accueil</a>
+        </nav>
+        <p class="footer-copy">© 2026 Planificateur de Repas — Dibaj Nasrullah &amp; JJ. Tous droits réservés.</p>
+    </footer>
+
+    <script src="assets/js/theme.js"></script>
+</body>
+</html>

@@ -192,6 +192,14 @@ class User
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function addFavorite(int $userId, int $recipeId): array
+    {
+        $ok = $this->db->prepare(
+            'INSERT IGNORE INTO favorites (user_id, recipe_id) VALUES (?, ?)'
+        )->execute([$userId, $recipeId]);
+        return ['success' => true, 'message' => 'Recette ajoutée aux favoris.'];
+    }
+
     public function removeFavorite(int $userId, int $recipeId): array
     {
         $ok = $this->db->prepare(
@@ -217,8 +225,98 @@ class User
              WHERE pr.token = ? AND pr.expires_at > NOW() AND pr.used = 0
              LIMIT 1'
         );
+        // On compare le HASH du token reçu : la base ne stocke jamais le token en clair.
         $stmt->execute([hash('sha256', $token)]);
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
+    /**
+     * Marque un jeton de réinitialisation comme « utilisé » pour qu'il ne
+     * puisse pas servir une deuxième fois (sécurité : usage unique).
+     *
+     * @param string $token Jeton en clair reçu dans l'URL.
+     */
+    public function markResetUsed(string $token): void
+    {
+        $this->db->prepare('UPDATE password_resets SET used = 1 WHERE token = ?')
+                 ->execute([hash('sha256', $token)]);
+    }
+
+    /**
+     * Définit un nouveau mot de passe pour un utilisateur donné (par son id).
+     * Utilisé par le flux « mot de passe oublié » (l'utilisateur n'est pas
+     * connecté, donc on ne vérifie pas l'ancien mot de passe).
+     *
+     * @param int    $id          Identifiant de l'utilisateur.
+     * @param string $newPassword Nouveau mot de passe en clair (sera haché).
+     * @return bool  true si la mise à jour a réussi.
+     */
+    public function updatePassword(int $id, string $newPassword): bool
+    {
+        return $this->db->prepare('UPDATE users SET password = :hash WHERE id = :id')
+            ->execute([
+                ':hash' => Security::hashPassword($newPassword),
+                ':id'   => $id,
+            ]);
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    //  VÉRIFICATION D'E-MAIL
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Enregistre un jeton de vérification d'e-mail (valable 24 h).
+     * On supprime d'abord les anciens jetons de cet utilisateur, puis on
+     * insère le HASH du nouveau (jamais le token en clair).
+     *
+     * @param int    $userId Identifiant de l'utilisateur.
+     * @param string $token  Jeton en clair (envoyé par e-mail).
+     */
+    public function saveVerificationToken(int $userId, string $token): void
+    {
+        $this->db->prepare('DELETE FROM email_verifications WHERE user_id = ?')
+                 ->execute([$userId]);
+        $this->db->prepare(
+            'INSERT INTO email_verifications (user_id, token, expires_at)
+             VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 24 HOUR))'
+        )->execute([$userId, hash('sha256', $token)]);
+    }
+
+    /**
+     * Retrouve l'utilisateur associé à un jeton de vérification valide
+     * (non expiré et non encore utilisé).
+     *
+     * @param string $token Jeton en clair reçu dans l'URL.
+     * @return array|null   Données utilisateur, ou null si jeton invalide.
+     */
+    public function findByVerificationToken(string $token): ?array
+    {
+        $stmt = $this->db->prepare(
+            'SELECT u.id, u.firstname, u.lastname, u.email, u.email_verified
+             FROM email_verifications ev
+             JOIN users u ON u.id = ev.user_id
+             WHERE ev.token = ? AND ev.expires_at > NOW() AND ev.used = 0
+             LIMIT 1'
+        );
+        $stmt->execute([hash('sha256', $token)]);
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
+    /**
+     * Confirme l'adresse d'un utilisateur : passe email_verified à 1 et
+     * marque le jeton comme utilisé (usage unique).
+     *
+     * @param int    $userId Identifiant de l'utilisateur.
+     * @param string $token  Jeton en clair (pour le marquer utilisé).
+     * @return bool  true si la confirmation a réussi.
+     */
+    public function markEmailVerified(int $userId, string $token): bool
+    {
+        $ok = $this->db->prepare('UPDATE users SET email_verified = 1 WHERE id = ?')
+                       ->execute([$userId]);
+        $this->db->prepare('UPDATE email_verifications SET used = 1 WHERE token = ?')
+                 ->execute([hash('sha256', $token)]);
+        return $ok;
     }
 
     private function initDefaultSettings(int $userId): void

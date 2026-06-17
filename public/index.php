@@ -1,153 +1,172 @@
 <?php
 /**
- * index.php point d'entrée unique (front controller) 
- * 
- * ce fichier : il route toutes les requêtes HTTP vers les bons contrôleurs.
+ * public/index.php — Front controller / routeur central
+ *
+ * Ce fichier gère TOUS les chemins du projet :
+ *   - sert index.html comme page principale (accueil)
+ *   - sert les fichiers statiques (assets : css, js, images, polices)
+ *   - route les pages applicatives (login, register, app, compte)
+ *   - route les pages légales (.html)
+ *   - délègue les requêtes /api/* au point d'entrée API
+ *
+ * Utilisé comme script de routage du serveur PHP intégré :
+ *   php -S localhost:8080 -t . public/index.php
+ * ou via la directive de réécriture du serveur web (Apache/Nginx).
  */
 
-require_once __DIR__ . '/../config/config.php';
+declare(strict_types=1);
 
-// les chemins de base
-define('BASE_PATH',       dirname(__DIR__));
-define('APP_PATH',        BASE_PATH . '/app');
-define('CONTROLLER_PATH', APP_PATH  . '/controllers');
-define('MODEL_PATH',      APP_PATH  . '/models');
-define('SERVICE_PATH',    APP_PATH  . '/services');
-define('VIEW_PATH',       APP_PATH  . '/views');
+/** Racine du projet (dossier parent de /public). */
+$ROOT = dirname(__DIR__);
 
-// autoloader PSR-0 (controllers + models + services)
-spl_autoload_register(function (string $class): void {
-    // Convertit app\core\Security → app/core/Security.php
-    $relativePath = str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php';
-    $file = BASE_PATH . DIRECTORY_SEPARATOR . $relativePath;
+/** Chemin demandé, nettoyé (sans query string, sans slash final). */
+$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
+$uri = '/' . trim(rawurldecode($uri), '/');   // normalise : "" → "/", "/login/" → "/login"
 
-    if (file_exists($file)) {
-        require_once $file;
-        return;
-    }
-
-    // Fallback : cherche le nom de classe seul dans les répertoires connus
-    $shortName = basename(str_replace('\\', '/', $class)) . '.php';
-    $dirs = [CONTROLLER_PATH, MODEL_PATH, SERVICE_PATH, APP_PATH . '/core', APP_PATH . '/middleware'];
-
-    foreach ($dirs as $dir) {
-        $file = $dir . DIRECTORY_SEPARATOR . $shortName;
-        if (file_exists($file)) {
-            require_once $file;
-            return;
+/* ─────────────────────────────────────────────────────────────────
+   1. FICHIERS STATIQUES
+   Si l'URL pointe vers un fichier réel (assets, images, polices…),
+   on laisse le serveur PHP le servir tel quel (return false).
+───────────────────────────────────────────────────────────────── */
+if ($uri !== '/' && preg_match('#\.(css|js|mjs|map|png|jpe?g|gif|svg|ico|webp|avif|woff2?|ttf|eot|pdf|txt|json)$#i', $uri)) {
+    $asset = $ROOT . $uri;
+    if (is_file($asset)) {
+        // En contexte « php -S » : laisser le serveur intégré servir le fichier.
+        if (PHP_SAPI === 'cli-server') {
+            return false;
         }
+        // En contexte serveur classique : streamer le fichier nous-mêmes.
+        $mimes = [
+            'css' => 'text/css', 'js' => 'application/javascript', 'mjs' => 'application/javascript',
+            'json' => 'application/json', 'svg' => 'image/svg+xml', 'png' => 'image/png',
+            'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'gif' => 'image/gif',
+            'webp' => 'image/webp', 'avif' => 'image/avif', 'ico' => 'image/x-icon',
+            'woff' => 'font/woff', 'woff2' => 'font/woff2', 'ttf' => 'font/ttf',
+            'pdf' => 'application/pdf', 'txt' => 'text/plain',
+        ];
+        $ext = strtolower(pathinfo($asset, PATHINFO_EXTENSION));
+        header('Content-Type: ' . ($mimes[$ext] ?? 'application/octet-stream'));
+        readfile($asset);
+        exit;
     }
-});
+}
 
-// headers communs
-header('Content-Type: application/json; charset=UTF-8');
-header('X-Content-Type-Options: nosniff');
-header('X-Frame-Options: DENY');
-
-// CORS — à restreindre en production
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
-
-// répondre immédiatement aux pre-flight OPTIONS
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(204);
+/* ─────────────────────────────────────────────────────────────────
+   2. API REST  (/api/...)
+   Délègue au point d'entrée API existant (api.php).
+───────────────────────────────────────────────────────────────── */
+if ($uri === '/api' || str_starts_with($uri, '/api/')) {
+    // On retire le préfixe /api pour qu'api.php reçoive la route via ?route=
+    $_GET['route'] = trim(substr($uri, strlen('/api')), '/');
+    require $ROOT . '/api.php';
+    exit;
+}
+// Compatibilité : appels directs à api.php (utilisés par assets/js/api.js)
+if ($uri === '/api.php' || str_starts_with($uri, '/api.php/')) {
+    require $ROOT . '/api.php';
     exit;
 }
 
-// lecture de la requête
-$uri    = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
-$method = $_SERVER['REQUEST_METHOD'];
+/* ─────────────────────────────────────────────────────────────────
+   3. ROUTES NOMMÉES
+   Chemins « propres » → fichier réel du projet.
+   index.html est la PAGE PRINCIPALE de l'application.
+───────────────────────────────────────────────────────────────── */
+$routes = [
+    '/'          => 'index.html',                       // ← page principale (accueil)
+    '/accueil'   => 'index.html',
+    '/home'      => 'index.html',
 
-// décompose l'URL en segments : "api/ingredients/42" -> ['api', 'ingredients', '42']
-$segments = explode('/', $uri);
+    '/login'     => 'login.php',
+    '/connexion' => 'login.php',
 
-// routeur
+    '/register'    => 'register.php',
+    '/inscription' => 'register.php',
 
-// structure attendue : /api/<resource>/[<id>]
-$base     = $segments[0] ?? '';          // "api"  ou ""
-$resource = $segments[1] ?? '';          // "ingredients" | "recipes" | "menus" | "auth"
-$id       = isset($segments[2]) && is_numeric($segments[2])
-              ? (int)$segments[2]
-              : null;
+    '/forgot-password'   => 'forgot-password.php',   // demande de réinitialisation
+    '/mot-de-passe-oublie' => 'forgot-password.php',
+    '/reset-password'    => 'reset-password.php',     // nouveau mot de passe
+    '/verify-email'      => 'verify-email.php',       // confirmation d'adresse
 
-// ── Page principale (SPA) 
-if ($base === '' || $base === 'index.html') {
-    header('Content-Type: text/html; charset=UTF-8');
-    readfile(BASE_PATH . '/public/index.html');
-    exit;
+    '/app'       => 'index.php',                         // l'application (SPA, requiert auth)
+    '/dashboard' => 'index.php',
+    '/menu'      => 'index.php',
+
+    '/account'     => 'public/account.php',
+    '/account.php' => 'public/account.php',   // accès direct (navigation JS : account.php?tab=…)
+    '/compte'      => 'public/account.php',
+
+    '/contact'         => 'Contact.html',
+    '/confidentialite' => 'PolitiqueDeConfidentialite.html',
+    '/conditions'      => 'ConditionsDeUtilisation.html',
+];
+
+if (isset($routes[$uri])) {
+    serve_file($ROOT . '/' . $routes[$uri], $ROOT);
 }
 
-// ── API REST 
-if ($base !== 'api') {
-    http_response_code(404);
-    echo json_encode(['success' => false, 'error' => 'Route introuvable']);
-    exit;
+/* ─────────────────────────────────────────────────────────────────
+   4. ACCÈS DIRECT À UN FICHIER .php / .html
+   Permet de conserver la navigation existante (login.php, account.php…).
+───────────────────────────────────────────────────────────────── */
+$candidate = $ROOT . $uri;
+$realRoot  = realpath($ROOT);
+$realFile  = realpath($candidate);
+
+// Sécurité : empêcher de remonter hors de la racine (path traversal)
+if ($realFile !== false && $realRoot !== false && str_starts_with($realFile, $realRoot)) {
+    if (is_file($realFile) && preg_match('#\.(php|html?)$#i', $realFile)) {
+        serve_file($realFile, $ROOT);
+    }
 }
 
-switch ($resource) {
+/* ─────────────────────────────────────────────────────────────────
+   5. 404 — Page introuvable
+───────────────────────────────────────────────────────────────── */
+http_response_code(404);
+header('Content-Type: text/html; charset=UTF-8');
+echo '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">'
+   . '<title>404 — Page introuvable</title>'
+   . '<style>body{font-family:sans-serif;text-align:center;padding:4rem 1rem;background:#F0EADC;color:#2A191F}'
+   . 'h1{font-size:3rem;margin:0}a{color:#CE2A2A}</style></head><body>'
+   . '<h1>404</h1><p>La page demandée est introuvable.</p>'
+   . '<p><a href="/">← Retour à l\'accueil</a></p></body></html>';
+exit;
 
-    // ── Authentification 
-    case 'auth':
-    case 'login':
-    case 'register':
-        $controller = new AuthController();
-        $controller->handle($method, $resource, $id);
-        break;
 
-    // ── Ingrédients 
-    case 'ingredients':
-    case 'ingredient':
-        $controller = new IngredientController();
-        $controller->handle($method, $id);
-        break;
+/* ═══════════════════════════════════════════════════════════════════
+   FONCTION UTILITAIRE
+═══════════════════════════════════════════════════════════════════ */
 
-    // ── Recettes 
-    case 'recipes':
-    case 'recipe':
-        $controller = new RecipeController();
-        $controller->handle($method, $id);
-        break;
-
-    // ── Menus hebdomadaires 
-    case 'menus':
-    case 'menu':
-        $controller = new MenuController();
-        $controller->handle($method, $id);
-        break;
-
-    // ── Génération automatique de menu 
-    case 'generate':
-        $controller = new MealController();
-        $controller->generate($method);
-        break;
-
-    // ── Export PDF 
-    case 'export-pdf':
-    case 'export_pdf':
-        $controller = new ExportController();
-        $controller->exportPdf($method);
-        break;
-
-    // ── Export ICS (calendrier) 
-    case 'export-ics':
-    case 'export_ics':
-        $controller = new ExportController();
-        $controller->exportIcs($method);
-        break;
-
-    // ── Nutritionnel 
-    case 'nutrition':
-        $controller = new NutritionController();
-        $controller->handle($method, $id);
-        break;
-
-    // ── Route inconnue 
-    default:
+/**
+ * Sert un fichier : exécute le PHP, ou streame le HTML/statique.
+ *
+ * @param string $file  Chemin absolu du fichier à servir.
+ * @param string $root  Racine du projet (répertoire de travail pour les require relatifs).
+ */
+function serve_file(string $file, string $root): void
+{
+    if (!is_file($file)) {
         http_response_code(404);
-        echo json_encode([
-            'success' => false,
-            'error'   => "Ressource « {$resource} » introuvable."
-        ]);
-        break;
+        exit;
+    }
+
+    $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+
+    if ($ext === 'php') {
+        // Se placer dans la racine pour que les chemins relatifs des scripts fonctionnent.
+        chdir($root);
+        require $file;
+        exit;
+    }
+
+    if ($ext === 'html' || $ext === 'htm') {
+        header('Content-Type: text/html; charset=UTF-8');
+        readfile($file);
+        exit;
+    }
+
+    // Autres types : streaming brut.
+    readfile($file);
+    exit;
 }

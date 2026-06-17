@@ -147,6 +147,9 @@ const API = (function () {
         const q = mealType ? '?meal_type=' + encodeURIComponent(mealType) : '';
         return request('GET', 'account/favorites' + q);
       },
+      addFavorite: function (recipeId) {
+        return request('POST', 'account/favorites', { recipe_id: recipeId });
+      },
       removeFavorite: function (recipeId) {
         return request('DELETE', 'account/favorites/' + recipeId);
       },

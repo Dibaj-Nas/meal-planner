@@ -19,6 +19,10 @@ $csrfToken = Security::csrfToken();
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Commissioner:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/auth.css">
+    <link rel="stylesheet" href="assets/css/theme.css">
+    <script>
+        (function(){var t=localStorage.getItem('theme')||'light';if(t==='system')t=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t);}());
+    </script>
 </head>
 <body>
 
@@ -181,6 +185,29 @@ $csrfToken = Security::csrfToken();
                     </div>
                     <span class="strength-label" id="pw-strength-label"></span>
                 </div>
+                <!-- Règles du mot de passe -->
+                <ul class="pw-rules" id="pw-rules" aria-label="Critères du mot de passe">
+                    <li class="pw-rule" id="rule-length"  data-rule="length">
+                        <span class="rule-icon" aria-hidden="true"></span>
+                        Minimum 8 caractères
+                    </li>
+                    <li class="pw-rule" id="rule-upper"   data-rule="upper">
+                        <span class="rule-icon" aria-hidden="true"></span>
+                        Au moins une lettre majuscule
+                    </li>
+                    <li class="pw-rule" id="rule-lower"   data-rule="lower">
+                        <span class="rule-icon" aria-hidden="true"></span>
+                        Au moins une lettre minuscule
+                    </li>
+                    <li class="pw-rule" id="rule-digit"   data-rule="digit">
+                        <span class="rule-icon" aria-hidden="true"></span>
+                        Au moins un chiffre
+                    </li>
+                    <li class="pw-rule" id="rule-special" data-rule="special">
+                        <span class="rule-icon" aria-hidden="true"></span>
+                        Au moins un caractère spécial (!@#$%…)
+                    </li>
+                </ul>
             </div>
 
             <!-- Confirmation mot de passe -->
@@ -214,8 +241,8 @@ $csrfToken = Security::csrfToken();
             <div class="form-group">
                 <label class="cgu-label">
                     <input type="checkbox" id="cgu" name="cgu" required aria-required="true">
-                    J'accepte les <a href="#">Conditions d'utilisation</a>
-                    et la <a href="#">Politique de confidentialité</a>
+                    J'accepte les <a href="/ConditionsDeUtilisation.html">Conditions d'utilisation</a>
+                    et la <a href="/PolitiqueDeConfidentialite.html">Politique de confidentialité</a>
                 </label>
             </div>
 
@@ -233,11 +260,17 @@ $csrfToken = Security::csrfToken();
                 <a href="login.php">Se connecter</a>
             </p>
 
+            <p class="contact-info">
+                Pour nous contacter, veuillez remplir le formulaire de contact.
+                <a href="/Contact.html">Contact</a>
+            </p>
+
         </form>
 
     </section>
 
     <script src="assets/js/api.js"></script>
     <script src="assets/js/auth.js"></script>
+    <script src="assets/js/theme.js"></script>
 </body>
 </html>

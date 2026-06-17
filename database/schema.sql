@@ -20,10 +20,27 @@ CREATE TABLE IF NOT EXISTS users (
   lastname    VARCHAR(100)  NOT NULL,
   email       VARCHAR(255)  NOT NULL,
   password    VARCHAR(255)  NOT NULL,          -- bcrypt hash
+  email_verified TINYINT(1) NOT NULL DEFAULT 0, -- 0 = adresse non confirmée, 1 = confirmée
   created_at  TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at  TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uk_email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Jetons de vérification d'e-mail (lien de confirmation envoyé à l'inscription)
+CREATE TABLE IF NOT EXISTS email_verifications (
+  id         INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+  user_id    INT UNSIGNED  NOT NULL,
+  token      VARCHAR(255)  NOT NULL,             -- hash SHA-256 du token (jamais en clair)
+  expires_at TIMESTAMP     NOT NULL,             -- validité (24 h)
+  used       TINYINT(1)    NOT NULL DEFAULT 0,   -- 1 une fois le lien cliqué
+  created_at TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uk_ev_token (token),
+  FOREIGN KEY fk_ev_user (user_id)
+    REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  INDEX idx_ev_token (token),
+  INDEX idx_ev_user  (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Paramètres utilisateur

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<!--
+  index.html — Page d'accueil (landing) du Planificateur de Repas
+  Présentation des fonctionnalités · guide · appel à l'action
+-->
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Planificateur de Repas : générez des menus hebdomadaires équilibrés et économiques, gérez vos ingrédients, recettes et budget en toute simplicité.">
+    <title>Planificateur de Repas — Organisez vos repas en toute simplicité</title>
+    <link rel="icon" href="assets/img/PR.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="assets/css/index.css">
+    <link rel="stylesheet" href="assets/css/theme.css">
+    <script>
+        (function(){var t=localStorage.getItem('theme')||'light';if(t==='system')t=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t);}());
+    </script>
+</head>
+<body>
+
+    <!-- Lien d'évitement pour l'accessibilité clavier -->
+    <a href="#main-content" class="skip-link">Aller au contenu principal</a>
+
+    <!-- ══ EN-TÊTE ══ -->
+    <header class="site-header">
+        <a href="index.html" class="logo" aria-label="Planificateur de Repas — Accueil">
+            <img src="assets/img/logoPlanificateurDeRepas.png" alt="">
+            <span>Planificateur de Repas</span>
+        </a>
+        <nav class="header-actions" aria-label="Connexion et inscription">
+            <a href="login.php" class="btn btn-secondary">Se connecter</a>
+            <a href="register.php" class="btn btn-primary">S'inscrire</a>
+        </nav>
+    </header>
+
+    <!-- ══ HERO ══ -->
+    <section class="hero" aria-labelledby="hero-title">
+        <span class="hero-tag">Application gratuite</span>
+        <h1 id="hero-title">Planificateur de Repas</h1>
+        <p class="subtitle">Organisez vos repas en toute simplicité</p>
+        <p class="hero-desc">
+            Générez des menus hebdomadaires équilibrés et économiques,
+            adaptés à votre budget et à vos préférences alimentaires.
+        </p>
+        <div class="hero-actions">
+            <a href="register.php" class="btn btn-primary btn-lg">Commencer gratuitement</a>
+            <a href="#how-it-works" class="btn btn-secondary btn-lg">Comment ça marche&nbsp;?</a>
+        </div>
+    </section>
+
+    <!-- ══ CONTENU PRINCIPAL ══ -->
+    <main id="main-content">
+
+        <!-- Présentation & fonctionnalités -->
+        <section class="section features" aria-labelledby="features-title">
+            <div class="section-inner">
+                <div class="section-head">
+                    <h2 id="features-title">Tout ce qu'il vous faut pour bien manger</h2>
+                    <p>
+                        Le Planificateur de Repas réunit tous les outils pour organiser
+                        votre semaine, maîtriser votre budget et varier vos assiettes.
+                    </p>
+                </div>
+
+                <ul class="features-grid" role="list">
+                    <li class="feature-card">
+                        <div class="feature-icon" aria-hidden="true">🥦</div>
+                        <h3>Gérez vos ingrédients</h3>
+                        <p>
+                            Créez votre bibliothèque d'ingrédients avec leurs prix
+                            et apports nutritionnels pour des menus sur mesure.
+                        </p>
+                    </li>
+                    <li class="feature-card">
+                        <div class="feature-icon" aria-hidden="true">📖</div>
+                        <h3>Créez vos recettes</h3>
+                        <p>
+                            Enregistrez vos recettes favorites par type de repas
+                            et préférence alimentaire (végétarien, vegan, sans porc…).
+                        </p>
+                    </li>
+                    <li class="feature-card">
+                        <div class="feature-icon" aria-hidden="true">🍽️</div>
+                        <h3>Générez vos menus</h3>
+                        <p>
+                            Obtenez un menu hebdomadaire complet en un clic, calibré
+                            selon votre budget et le nombre de convives.
+                        </p>
+                    </li>
+                    <li class="feature-card">
+                        <div class="feature-icon" aria-hidden="true">💰</div>
+                        <h3>Maîtrisez votre budget</h3>
+                        <p>
+                            Visualisez le coût total, le coût par repas et par personne
+                            pour ne plus jamais dépasser votre budget.
+                        </p>
+                    </li>
+                    <li class="feature-card">
+                        <div class="feature-icon" aria-hidden="true">📊</div>
+                        <h3>Suivez vos apports</h3>
+                        <p>
+                            Calories et protéines sont calculées automatiquement
+                            pour garder une alimentation équilibrée.
+                        </p>
+                    </li>
+                    <li class="feature-card">
+                        <div class="feature-icon" aria-hidden="true">📅</div>
+                        <h3>Exportez vos menus</h3>
+                        <p>
+                            Téléchargez vos menus au format PDF ou ajoutez-les
+                            à votre calendrier grâce à l'export ICS.
+                        </p>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Comment ça marche -->
+        <section class="section" id="how-it-works" aria-labelledby="how-title">
+            <div class="section-inner">
+                <div class="section-head">
+                    <h2 id="how-title">Comment ça marche&nbsp;?</h2>
+                    <p>Trois étapes simples pour planifier votre semaine.</p>
+                </div>
+
+                <ol class="steps-grid">
+                    <li class="step-card">
+                        <div class="step-number" aria-hidden="true">1</div>
+                        <h3>Créez votre compte</h3>
+                        <p>
+                            Inscrivez-vous gratuitement en quelques secondes
+                            et définissez vos préférences alimentaires.
+                        </p>
+                    </li>
+                    <li class="step-card">
+                        <div class="step-number" aria-hidden="true">2</div>
+                        <h3>Ajoutez vos données</h3>
+                        <p>
+                            Renseignez vos ingrédients et vos recettes,
+                            ou partez directement de notre base existante.
+                        </p>
+                    </li>
+                    <li class="step-card">
+                        <div class="step-number" aria-hidden="true">3</div>
+                        <h3>Générez votre menu</h3>
+                        <p>
+                            Indiquez votre budget et le nombre de personnes,
+                            puis laissez l'application composer votre semaine.
+                        </p>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Appel à l'action -->
+        <section class="cta" aria-labelledby="cta-title">
+            <h2 id="cta-title">Prêt à simplifier vos repas&nbsp;?</h2>
+            <p>
+                Rejoignez le Planificateur de Repas et reprenez le contrôle
+                de votre alimentation, sans effort et sans gaspillage.
+            </p>
+            <a href="register.php" class="btn btn-cta">Créer mon compte gratuitement</a>
+        </section>
+
+    </main>
+
+    <!-- ══ PIED DE PAGE ══ -->
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <nav class="footer-nav" aria-label="Liens légaux">
+                <a href="login.php">Se connecter</a>
+                <span class="footer-sep" aria-hidden="true">·</span>
+                <a href="register.php">S'inscrire</a>
+                <span class="footer-sep" aria-hidden="true">·</span>
+                <a href="PolitiqueDeConfidentialite.html">Politique de confidentialité</a>
+                <span class="footer-sep" aria-hidden="true">·</span>
+                <a href="ConditionsDeUtilisation.html">Conditions d'utilisation</a>
+                <span class="footer-sep" aria-hidden="true">·</span>
+                <a href="Contact.html">Contact</a>
+            </nav>
+            <p class="info-footer">&copy; 2026 Application Planificateur de Repas est réalisé avec le 🤎 Développée par <span>Dibaj NASRULLAH</span> tout droit réservés</p>
+
+        </div>
+    </footer>
+
+    <script src="assets/js/theme.js"></script>
+</body>
+</html>

@@ -183,6 +183,13 @@ function initRegister() {
     const segments       = [1, 2, 3, 4].map(i => document.getElementById(`seg${i}`));
     const strengthLabel  = document.getElementById('pw-strength-label');
     const confirmHint    = document.getElementById('confirm-hint');
+    const pwRulesItems   = {
+        length:  document.getElementById('rule-length'),
+        upper:   document.getElementById('rule-upper'),
+        lower:   document.getElementById('rule-lower'),
+        digit:   document.getElementById('rule-digit'),
+        special: document.getElementById('rule-special'),
+    };
 
     /* ── Toggle visibilité des deux champs mot de passe ── */
     toggleBtn1.addEventListener('click', () => togglePasswordVisibility(toggleBtn1, pwInput));
@@ -220,26 +227,44 @@ function initRegister() {
     }
 
     /**
-     * Met à jour visuellement les segments et le label de force.
+     * Met à jour visuellement les segments, le label de force,
+     * et les règles de validation individuelles.
      */
     function updateStrengthIndicator() {
-        const score = pwInput.value ? calcStrength(pwInput.value) : 0;
+        const val   = pwInput.value;
+        const score = val ? calcStrength(val) : 0;
 
         segments.forEach((seg, i) => {
             seg.className = 'strength-segment';
             if (i < score) seg.classList.add(STRENGTH_LEVELS.classes[score]);
         });
 
-        if (!pwInput.value) {
+        if (!val) {
             strengthLabel.textContent = '';
-            return;
+        } else {
+            strengthLabel.textContent = `Force : ${STRENGTH_LEVELS.labels[score]}`;
+            strengthLabel.style.color =
+                score <= 1 ? STRENGTH_LEVELS.colors.weak   :
+                score === 2 ? STRENGTH_LEVELS.colors.medium :
+                STRENGTH_LEVELS.colors.strong;
         }
 
-        strengthLabel.textContent = `Force : ${STRENGTH_LEVELS.labels[score]}`;
-        strengthLabel.style.color =
-            score <= 1 ? STRENGTH_LEVELS.colors.weak   :
-            score === 2 ? STRENGTH_LEVELS.colors.medium :
-            STRENGTH_LEVELS.colors.strong;
+        /* Mise à jour des règles individuelles */
+        const rules = {
+            length:  val.length >= 8,
+            upper:   /[A-Z]/.test(val),
+            lower:   /[a-z]/.test(val),
+            digit:   /[0-9]/.test(val),
+            special: /[^A-Za-z0-9]/.test(val),
+        };
+        Object.entries(rules).forEach(([key, ok]) => {
+            const el = pwRulesItems[key];
+            if (!el) return;
+            el.classList.toggle('valid', ok);
+            el.querySelector('.rule-icon').setAttribute(
+                'aria-label', ok ? 'Critère validé' : 'Critère non validé'
+            );
+        });
     }
 
     pwInput.addEventListener('input', updateStrengthIndicator);
