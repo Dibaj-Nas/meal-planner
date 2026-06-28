@@ -69,6 +69,7 @@ CREATE TABLE IF NOT EXISTS ingredients (
   PRIMARY KEY (id),
   FOREIGN KEY fk_ing_user (user_id)
     REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  UNIQUE KEY uk_ing_user_name (user_id, name),
   INDEX idx_ing_user     (user_id),
   INDEX idx_ing_category (user_id, category)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -88,6 +89,7 @@ CREATE TABLE IF NOT EXISTS recipes (
   PRIMARY KEY (id),
   FOREIGN KEY fk_rec_user (user_id)
     REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+  UNIQUE KEY uk_rec_user_name_type (user_id, name, meal_type),
   INDEX idx_rec_user      (user_id),
   INDEX idx_rec_meal_type (user_id, meal_type),
   INDEX idx_rec_dietary   (user_id, dietary)

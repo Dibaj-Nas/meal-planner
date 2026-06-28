@@ -1454,22 +1454,22 @@ function initUserMenu() {
 // Actions du dropdown
 function goToProfile() {
   closeUserDropdown();
-  window.location.href = 'public/account.php?tab=profile';
+  window.location.href = '/account.php?tab=profile';
 }
 
 function goToSettings() {
   closeUserDropdown();
-  window.location.href = 'public/account.php?tab=settings';
+  window.location.href = '/account.php?tab=settings';
 }
 
 function goToMyMenus() {
   closeUserDropdown();
-  window.location.href = 'public/account.php?tab=saved-menus';
+  window.location.href = '/account.php?tab=saved-menus';
 }
 
 function goToFavorites() {
   closeUserDropdown();
-  window.location.href = 'public/account.php?tab=favorites';
+  window.location.href = '/account.php?tab=favorites';
 }
 
 function logout() {
@@ -1480,9 +1480,9 @@ function logout() {
   if (typeof API !== 'undefined') {
     API.auth.logout()
       .catch(function () {})
-      .finally(function () { window.location.href = 'index.html'; });
+      .finally(function () { window.location.href = '/'; });
   } else {
-    window.location.href = 'index.html';
+    window.location.href = '/';
   }
 }
 

@@ -1,6 +1,8 @@
+# Secrets et configuration locale (ne pas committer)
 .env
-database/
-config/
+config/config.php
+
+# Fichiers sensibles / locaux
 Security.php
 
 # macOS

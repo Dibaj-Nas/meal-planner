@@ -4,7 +4,7 @@ require_once __DIR__ . '/../config/config.php';
 use App\Core\Security;
 use App\Middleware\AuthMiddleware;
 
-AuthMiddleware::requireGuest('index.php');
+AuthMiddleware::requireGuest('/index.php');
 $csrfToken = Security::csrfToken();
 ?>
 <!DOCTYPE html>

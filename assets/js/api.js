@@ -4,7 +4,10 @@
 'use strict';
 
 const API = (function () {
-  const BASE = 'api.php';
+  // Chemin ABSOLU (avec / au début) : indispensable pour que l'API soit
+  // toujours appelée à la racine du site, quelle que soit l'URL de la page
+  // (ex : /user/login.php ne doit PAS appeler /user/api.php).
+  const BASE = '/api.php';
 
   function csrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -51,7 +54,7 @@ const API = (function () {
     }
 
     if (response.status === 401 && !path.includes('auth/login')) {
-      window.location.href = 'login.php';
+      window.location.href = '/login.php';
       throw new Error(data.error || 'Non authentifié');
     }
 

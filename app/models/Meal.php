@@ -45,9 +45,8 @@ class Meal
         $sql = 'SELECT r.*, GROUP_CONCAT(ri.ingredient_name ORDER BY ri.ingredient_name SEPARATOR \', \') AS ingredients_list
                 FROM recipes r
                 LEFT JOIN recipe_ingredients ri ON ri.recipe_id = r.id
-                WHERE r.user_id IN (:uid, :sys)';
-        // On construit la requête morceau par morceau selon les filtres reçus.
-        $params = [':uid' => $userId, ':sys' => (int) SYSTEM_USER_ID];
+                WHERE r.user_id = :uid';
+        $params = [':uid' => $userId];
 
         if ($mealType !== '') {
             $sql .= ' AND r.meal_type = :meal_type';

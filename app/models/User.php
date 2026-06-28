@@ -337,6 +337,13 @@ class User
             return;
         }
 
+        // Évite les doublons si le seed a déjà été copié (ré-inscription, migration…).
+        $stmt = $this->db->prepare('SELECT COUNT(*) FROM recipes WHERE user_id = ?');
+        $stmt->execute([$userId]);
+        if ((int) $stmt->fetchColumn() > 0) {
+            return;
+        }
+
         $this->db->prepare(
             'INSERT INTO ingredients (user_id, name, price, unit, calories, protein, category)
              SELECT ?, name, price, unit, calories, protein, category FROM ingredients WHERE user_id = ?'

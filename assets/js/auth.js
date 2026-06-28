@@ -148,7 +148,7 @@ function initLogin() {
                 sessionStorage.setItem('currentUser', JSON.stringify(data.data.user));
             }
 
-            window.location.href = 'index.php';
+            window.location.href = '/index.php';
 
         } catch (error) {
             console.error('[Login] Erreur :', error);
@@ -312,7 +312,7 @@ function initRegister() {
     function showSuccess() {
         successBox.classList.add('visible');
         errorBox.classList.remove('visible');
-        setTimeout(() => { window.location.href = 'login.php'; }, 1600);
+        setTimeout(() => { window.location.href = '/login.php'; }, 1600);
     }
 
     /* Efface l'erreur dès qu'un champ est modifié */

@@ -86,7 +86,7 @@ class AuthMiddleware
 
         /* Mémorise l'URL pour y revenir après connexion */
         $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'] ?? '/';
-        header('Location: login.php');
+        header('Location: /login.php');
         exit;
     }
 

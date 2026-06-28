@@ -1,10 +1,12 @@
 <?php
 /**
- * config/config.php — Configuration globale
- * Planificateur de Repas
+ * config/config.example.php — Modèle de configuration
  *
- * Copiez config/config.example.php si ce fichier n'existe pas encore.
- * Les secrets (BDD, SMTP) doivent être définis dans .env, jamais commités.
+ * Copiez ce fichier vers config/config.php puis adaptez les valeurs.
+ * Vous pouvez aussi définir les variables dans un fichier .env à la racine.
+ *
+ *   cp config/config.example.php config/config.php
+ *   cp .env.example .env
  */
 
 declare(strict_types=1);
@@ -52,6 +54,7 @@ define('DB_USER',    getenv('DB_USER')    ?: 'root');
 define('DB_PASS',    getenv('DB_PASS')    ?: '');
 define('DB_CHARSET', 'utf8mb4');
 
+/** Compte système portant les données seed (ingrédients / recettes par défaut). */
 define('SYSTEM_USER_ID', (int) (getenv('SYSTEM_USER_ID') ?: 1));
 
 // 4. Application
@@ -59,7 +62,7 @@ define('APP_URL',          getenv('APP_URL') ?: 'http://localhost:3000');
 define('SESSION_LIFETIME', (int) (getenv('SESSION_LIFETIME') ?: 1800));
 define('CSRF_SECRET',      getenv('CSRF_SECRET') ?: 'changez-cette-cle-secrete-minimum-64-caracteres-xxxx');
 
-// 5. PHPMailer (SMTP)
+// 5. PHPMailer (SMTP) — laissez MAIL_PASSWORD vide en dev si vous n'envoyez pas d'e-mails
 define('MAIL_HOST',       getenv('MAIL_HOST')       ?: 'smtp.gmail.com');
 define('MAIL_PORT',       (int) (getenv('MAIL_PORT') ?: 587));
 define('MAIL_USERNAME',   getenv('MAIL_USERNAME')   ?: '');
@@ -111,6 +114,7 @@ spl_autoload_register(function (string $fqcn): void {
         return;
     }
 
+    // Repli insensible à la casse (macOS / déploiements hétérogènes)
     $dir = APP_PATH . '/' . ($subDir ? $subDir . '/' : '');
     if (!is_dir($dir)) {
         return;

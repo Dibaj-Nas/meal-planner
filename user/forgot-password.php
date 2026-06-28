@@ -24,7 +24,7 @@ use App\Models\User;
 use App\Services\MailService;
 
 // Un utilisateur déjà connecté n'a rien à faire ici → on le renvoie à l'app.
-AuthMiddleware::requireGuest('index.php');
+AuthMiddleware::requireGuest('/index.php');
 
 $csrfToken = Security::csrfToken();
 $done    = false;   // passe à true une fois la demande traitée

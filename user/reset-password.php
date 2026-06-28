@@ -19,7 +19,7 @@ use App\Core\Security;
 use App\Middleware\AuthMiddleware;
 use App\Models\User;
 
-AuthMiddleware::requireGuest('index.php');
+AuthMiddleware::requireGuest('/index.php');
 
 $csrfToken = Security::csrfToken();
 $userModel = new User();
